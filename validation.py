@@ -61,18 +61,10 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
                                                     dropout=config['dropout'],
                                                     optimizer=optimizer,
                                                     pretraining=config['pretraining'])
-    elif config['backbone'] == "mobilenet":
-        model = build_mobilenetv2_model(input_shape=input_shape,
-                                        dropout=config['dropout'],
-                                        optimizer=optimizer,
-                                        pretraining=config['pretraining'])
-    elif config['backbone'] == "efficientnet":
-        model = build_efficientnet_model(input_shape=input_shape,
-                                         dropout=config['dropout'],
-                                         optimizer=optimizer,
-                                         pretraining=config['pretraining'])
-    else:
-        raise Exception("Unknown model name")
+    
+    # Convert the model
+    # converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    # model = converter.convert()
 
     print("[INFO] Input Shape:", input_shape)
 

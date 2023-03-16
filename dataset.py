@@ -197,7 +197,7 @@ class Dataset():
         global LayerDict
 
         # obtain dataset
-        ds, info = tfds.load('autsl_tssi', data_dir="datasets", with_info=True)
+        ds, info = tfds.load('pop_sign', data_dir="datasets", with_info=True)
 
         # generate train dataset
         if concat_validation_to_train:
@@ -265,7 +265,6 @@ class Dataset():
         # define the val map function
         @tf.function
         def test_map_fn(batch_x, batch_y):
-            batch_x = FillZWithZeros()(batch_x)
             batch_x = preprocessing_pipeline(batch_x)
             return batch_x, batch_y
 
@@ -287,7 +286,6 @@ class Dataset():
         # define the val map function
         @tf.function
         def test_map_fn(batch_x, batch_y):
-            batch_x = FillZWithZeros()(batch_x)
             batch_x = preprocessing_pipeline(batch_x)
             return batch_x, batch_y
 
