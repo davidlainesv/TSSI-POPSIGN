@@ -63,7 +63,7 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
                                                     pretraining=config['pretraining'])
         
     elif config['backbone'] == "efficient":
-        model, _ = build_efficientnet_model(input_shape=input_shape,
+        model = build_efficientnet_model(input_shape=input_shape,
                                             dropout=config['dropout'],
                                             optimizer=optimizer,
                                             pretraining=config['pretraining'])
