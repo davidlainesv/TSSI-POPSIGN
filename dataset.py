@@ -156,7 +156,7 @@ def generate_test_dataset(dataset,
     ds = dataset.map(label_to_one_hot)
 
     # batch dataset
-    max_element_length = 200
+    max_element_length = 500
     bucket_boundaries = list(range(1, max_element_length))
     bucket_batch_sizes = [batch_size] * max_element_length
     ds = ds.bucket_by_sequence_length(
