@@ -47,15 +47,15 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
     print("[INFO] Dataset Validation examples:", dataset.num_val_examples)
 
     # setup optimizer
-    if config["optimizer"] == "adam":
-        optimizer = build_adam_optimizer(initial_learning_rate=config['initial_learning_rate'],
+    if config["optimizer"] == "sgd":
+        optimizer = build_sgd_optimizer(initial_learning_rate=config['initial_learning_rate'],
                                         maximal_learning_rate=config['maximal_learning_rate'],
                                         momentum=config['momentum'],
                                         nesterov=config['nesterov'],
                                         step_size=config['step_size'],
                                         weight_decay=config['weight_decay'])
-    elif config["optimizer"] == "sgd":
-        optimizer = build_sgd_optimizer(initial_learning_rate=config['initial_learning_rate'],
+    elif config["optimizer"] == "adam":
+        optimizer = build_adam_optimizer(initial_learning_rate=config['initial_learning_rate'],
                                         maximal_learning_rate=config['maximal_learning_rate'],
                                         nesterov=config['nesterov'],
                                         step_size=config['step_size'],
