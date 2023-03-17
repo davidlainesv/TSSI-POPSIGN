@@ -128,6 +128,7 @@ def main(args):
     batch_size = args.batch_size
     num_epochs = args.num_epochs
     pipeline = args.pipeline
+    optimizer = args.optimizer
 
     dataset = Dataset()
 
@@ -148,7 +149,9 @@ def main(args):
         'num_epochs': num_epochs,
         'augmentation': augmentation,
         'batch_size': batch_size,
-        'pipeline': pipeline
+        'pipeline': pipeline,
+
+        'optimizer': optimizer
     }
 
     agent_fn(config=config, project=project, entity=entity, verbose=2)
