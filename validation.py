@@ -62,11 +62,14 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
                                                     optimizer=optimizer,
                                                     pretraining=config['pretraining'])
         
-    elif config['backbone'] == "efficient":
+    elif config['backbone'] == "efficientnet":
         model = build_efficientnet_model(input_shape=input_shape,
                                             dropout=config['dropout'],
                                             optimizer=optimizer,
                                             pretraining=config['pretraining'])
+        
+    else:
+        raise Exception("Model unknown")
     
     # Convert the model
     # converter = tf.lite.TFLiteConverter.from_keras_model(model)
