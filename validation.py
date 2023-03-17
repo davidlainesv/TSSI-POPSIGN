@@ -56,11 +56,10 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
                                         weight_decay=config['weight_decay'])
     elif config["optimizer"] == "adam":
         optimizer = build_adam_optimizer(initial_learning_rate=config['initial_learning_rate'],
-                                        maximal_learning_rate=config['maximal_learning_rate'],
-                                        nesterov=config['nesterov'],
-                                        step_size=config['step_size'],
-                                        weight_decay=config['weight_decay'],
-                                        epsilon=config['epsilon'])
+                                         maximal_learning_rate=config['maximal_learning_rate'],
+                                         step_size=config['step_size'],
+                                         weight_decay=config['weight_decay'],
+                                         epsilon=config['epsilon'])
 
     # setup model
     input_shape = [None, dataset.input_width, 3]
