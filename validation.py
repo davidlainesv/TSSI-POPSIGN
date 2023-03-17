@@ -57,10 +57,16 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
     # setup model
     input_shape = [None, dataset.input_width, 3]
     if config['backbone'] == "densenet":
-        model, base_model = build_densenet121_model(input_shape=input_shape,
+        model, _ = build_densenet121_model(input_shape=input_shape,
                                                     dropout=config['dropout'],
                                                     optimizer=optimizer,
                                                     pretraining=config['pretraining'])
+        
+    elif config['backbone'] == "efficient":
+        model, _ = build_efficientnet_model(input_shape=input_shape,
+                                            dropout=config['dropout'],
+                                            optimizer=optimizer,
+                                            pretraining=config['pretraining'])
     
     # Convert the model
     # converter = tf.lite.TFLiteConverter.from_keras_model(model)
