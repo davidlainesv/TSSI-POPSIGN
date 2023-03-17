@@ -68,14 +68,14 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
                                            dropout=config['dropout'],
                                            optimizer=optimizer,
                                            pretraining=config['pretraining'],
-                                           focal_loss=config['focal_loss'])
+                                           use_focal_loss=config['focal_loss'])
         
     elif config['backbone'] == "efficientnet":
         model = build_efficientnet_model(input_shape=input_shape,
                                          dropout=config['dropout'],
                                          optimizer=optimizer,
                                          pretraining=config['pretraining'],
-                                         focal_loss=config['focal_loss'])
+                                         use_focal_loss=config['focal_loss'])
         
     else:
         raise Exception("Model unknown")
