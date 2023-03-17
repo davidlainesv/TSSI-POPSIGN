@@ -65,15 +65,17 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
     input_shape = [None, dataset.input_width, 3]
     if config['backbone'] == "densenet":
         model, _ = build_densenet121_model(input_shape=input_shape,
-                                                    dropout=config['dropout'],
-                                                    optimizer=optimizer,
-                                                    pretraining=config['pretraining'])
+                                           dropout=config['dropout'],
+                                           optimizer=optimizer,
+                                           pretraining=config['pretraining'],
+                                           focal_loss=config['focal_loss'])
         
     elif config['backbone'] == "efficientnet":
         model = build_efficientnet_model(input_shape=input_shape,
-                                            dropout=config['dropout'],
-                                            optimizer=optimizer,
-                                            pretraining=config['pretraining'])
+                                         dropout=config['dropout'],
+                                         optimizer=optimizer,
+                                         pretraining=config['pretraining'],
+                                         focal_loss=config['focal_loss'])
         
     else:
         raise Exception("Model unknown")
@@ -129,6 +131,7 @@ def main(args):
     pipeline = args.pipeline
     optimizer = args.optimizer
     epsilon = args.epsilon
+    focal_loss = args.focal_loss
 
     dataset = Dataset()
 
@@ -152,7 +155,8 @@ def main(args):
         'pipeline': pipeline,
 
         'optimizer': optimizer,
-        'epsilon': epsilon
+        'epsilon': epsilon,
+        'focal_loss': focal_loss
     }
 
     agent_fn(config=config, project=project, entity=entity, verbose=2)
@@ -171,6 +175,8 @@ if __name__ == "__main__":
                         help='Add pretraining', default=False)
     parser.add_argument('--augmentation', type=str2bool,
                         help='Add augmentation', default=False)
+    parser.add_argument('--focal_loss', type=str2bool,
+                        help='Use focal loss', default=False)
     parser.add_argument('--optimizer', type=str,
                         help='Optimizer: \'sgd\', \'adam\'', default='sgd')
     parser.add_argument('--lr_min', type=float,
