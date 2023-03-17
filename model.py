@@ -11,8 +11,6 @@ from tensorflow.keras.applications.densenet import DenseNet121
 from tensorflow.keras.applications.nasnet import NASNetMobile
 # from tensorflow.keras.applications.efficientnet import EfficientNetB0
 
-import wandb
-
 
 def build_densenet121_model(input_shape=[None, 128, 3], dropout=0,
                             optimizer=None, pretraining=True):
@@ -136,7 +134,6 @@ def build_efficientnet_model(input_shape=[None, 128, 3], dropout=0,
     # setup model
     weights = "imagenet" if pretraining else None
     inputs = Input(shape=input_shape)
-    # inputs = tf.keras.layers.Resizing(128, 224)(inputs)
     x = EfficientNetB0(input_shape=input_shape, weights=weights,
                        include_top=False, pooling="avg")(inputs)
     x = Dropout(dropout)(x)
