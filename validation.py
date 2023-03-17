@@ -5,8 +5,8 @@ import numpy as np
 import wandb
 from wandb.keras import WandbCallback
 import tensorflow as tf
-from model import build_densenet121_model, build_efficientnet_model, build_mobilenetv2_model
-from optimizer import build_sgd_optimizer
+from model import build_densenet121_model, build_efficientnet_model
+from optimizer import build_sgd_optimizer, build_adam_optimizer
 from utils import str2bool
 
 dataset = None
@@ -47,12 +47,20 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
     print("[INFO] Dataset Validation examples:", dataset.num_val_examples)
 
     # setup optimizer
-    optimizer = build_sgd_optimizer(initial_learning_rate=config['initial_learning_rate'],
-                                    maximal_learning_rate=config['maximal_learning_rate'],
-                                    momentum=config['momentum'],
-                                    nesterov=config['nesterov'],
-                                    step_size=config['step_size'],
-                                    weight_decay=config['weight_decay'])
+    if config["optimizer"] == "adam":
+        optimizer = build_adam_optimizer(initial_learning_rate=config['initial_learning_rate'],
+                                        maximal_learning_rate=config['maximal_learning_rate'],
+                                        momentum=config['momentum'],
+                                        nesterov=config['nesterov'],
+                                        step_size=config['step_size'],
+                                        weight_decay=config['weight_decay'])
+    elif config["optimizer"] == "sgd":
+        optimizer = build_sgd_optimizer(initial_learning_rate=config['initial_learning_rate'],
+                                        maximal_learning_rate=config['maximal_learning_rate'],
+                                        nesterov=config['nesterov'],
+                                        step_size=config['step_size'],
+                                        weight_decay=config['weight_decay'],
+                                        epsilon=config['epsilon'])
 
     # setup model
     input_shape = [None, dataset.input_width, 3]
@@ -159,6 +167,8 @@ if __name__ == "__main__":
                         help='Add pretraining', default=False)
     parser.add_argument('--augmentation', type=str2bool,
                         help='Add augmentation', default=False)
+    parser.add_argument('--optimizer', type=str,
+                        help='Optimizer: \'sgd\', \'adam\'', default='sgd')
     parser.add_argument('--lr_min', type=float,
                         help='Minimum learning rate', default=0.001)
     parser.add_argument('--lr_max', type=float,
@@ -167,6 +177,8 @@ if __name__ == "__main__":
                         help='Minimum learning rate', default=0)
     parser.add_argument('--weight_decay', type=float,
                         help='Minimum learning rate', default=0)
+    parser.add_argument('--epsilon', type=float,
+                        help='Epsilon (for adam optimizer)', default=1e-7)
     parser.add_argument('--batch_size', type=int,
                         help='Batch size of training and testing', default=64)
     parser.add_argument('--num_epochs', type=int,
