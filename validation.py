@@ -85,33 +85,6 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
               validation_data=validation_dataset,
               callbacks=callbacks)
 
-    # train for a few more epochs
-    if base_model is not None and False:
-        extra_epochs = 20
-        base_model.trainable = True
-        metrics = [tf.keras.metrics.TopKCategoricalAccuracy(
-            k=1, name='top_1', dtype=tf.float32)]
-
-        if config["last_optimizer"] == "adam":
-            optimizer = tf.keras.optimizers.Adam(1e-2)
-        else:
-            optimizer = build_sgd_optimizer(initial_learning_rate=config['initial_learning_rate'],
-                                            maximal_learning_rate=config['maximal_learning_rate'],
-                                            momentum=config['momentum'],
-                                            nesterov=config['nesterov'],
-                                            step_size=config['step_size'],
-                                            weight_decay=config['weight_decay'])
-        model.compile(
-            optimizer=optimizer,
-            loss='categorical_crossentropy',
-            metrics=metrics,
-        )
-        model.fit(train_dataset,
-                  epochs=extra_epochs,
-                  verbose=verbose,
-                  validation_data=validation_dataset,
-                  callbacks=callbacks)
-
     # get the logs of the model
     return model.history
 
@@ -138,7 +111,6 @@ def main(args):
     batch_size = args.batch_size
     num_epochs = args.num_epochs
     pipeline = args.pipeline
-    # extra_epochs = args.extra_epochs
 
     dataset = Dataset()
 
@@ -159,10 +131,7 @@ def main(args):
         'num_epochs': num_epochs,
         'augmentation': augmentation,
         'batch_size': batch_size,
-
-        'pipeline': pipeline,
-        # 'extra_epochs': extra_epochs
-        'last_optimizer': args.last_optimizer
+        'pipeline': pipeline
     }
 
     agent_fn(config=config, project=project, entity=entity, verbose=2)
@@ -173,32 +142,28 @@ if __name__ == "__main__":
     parser.add_argument('--entity', type=str,
                         help='Entity', default='davidlainesv')
     parser.add_argument('--project', type=str,
-                        help='Project name', default='autsl-validation')
+                        help='Project name', default='popsign-validation')
     parser.add_argument('--backbone', type=str,
                         help='Backbone method: \'densenet\', \'mobilenet\'',
                         default='densenet')
     parser.add_argument('--pretraining', type=str2bool,
-                        help='Add pretraining', default=True)
+                        help='Add pretraining', default=False)
     parser.add_argument('--augmentation', type=str2bool,
                         help='Add augmentation', default=False)
     parser.add_argument('--lr_min', type=float,
-                        help='Minimum learning rate', default=0.0001)
-    parser.add_argument('--lr_max', type=float,
                         help='Minimum learning rate', default=0.001)
+    parser.add_argument('--lr_max', type=float,
+                        help='Minimum learning rate', default=0.01)
     parser.add_argument('--dropout', type=float,
-                        help='Minimum learning rate', default=0.3)
+                        help='Minimum learning rate', default=0)
     parser.add_argument('--weight_decay', type=float,
-                        help='Minimum learning rate', default=1e-7)
+                        help='Minimum learning rate', default=0)
     parser.add_argument('--batch_size', type=int,
-                        help='Batch size of training and testing', default=32)
+                        help='Batch size of training and testing', default=64)
     parser.add_argument('--num_epochs', type=int,
-                        help='Number of epochs', default=100)
+                        help='Number of epochs', default=24)
     parser.add_argument('--pipeline', type=str,
                         help='Pipeline', default="default")
-    # parser.add_argument('--extra_epochs', type=str2bool,
-    #                     help='Extra epochs', default=False)
-    parser.add_argument('--last_optimizer', type=str,
-                        help='Last optimizer', default='cyclical')
     args = parser.parse_args()
 
     print(args)
