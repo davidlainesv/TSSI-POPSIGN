@@ -93,7 +93,7 @@ def build_densenet121_model(input_shape=[None, 128, 3], dropout=0,
 
 
 def build_densenet121_model(input_shape=[None, 128, 3], dropout=0,
-                            optimizer=None, pretraining=True, focal_loss=False):
+                            optimizer=None, pretraining=True, use_focal_loss=False):
     # setup model
     weights = 'imagenet' if pretraining else None
     inputs = Input(shape=input_shape)
@@ -119,7 +119,7 @@ def build_densenet121_model(input_shape=[None, 128, 3], dropout=0,
 
 
 def build_efficientnet_model(input_shape=[None, 128, 3], dropout=0,
-                             optimizer=None, pretraining=True, focal_loss=False):
+                             optimizer=None, pretraining=True, use_focal_loss=False):
     # setup model
     weights = "imagenet" if pretraining else None
     inputs = Input(shape=input_shape)
