@@ -197,22 +197,22 @@ class Dataset():
         global LayerDict
 
         # obtain dataset
-        ds, info = tfds.load('pop_sign', data_dir="datasets", with_info=True)
+        ds, info = tfds.load('popsign', data_dir="datasets/kaggle/working/datasets", with_info=True)
 
         # generate train dataset
         if concat_validation_to_train:
             ds["train"] = ds["train"].concatenate(ds["validation"])
 
         # generate norm layer
-        norm = tf.keras.layers.Normalization(axis=-2)
-        norm.adapt(ds["train"].map(extract_pose,
-                                   num_parallel_calls=tf.data.AUTOTUNE))
-        LayerDict["norm"]["layer"] = norm
+        # norm = tf.keras.layers.Normalization(axis=-2)
+        # norm.adapt(ds["train"].map(extract_pose,
+        #                            num_parallel_calls=tf.data.AUTOTUNE))
+        # LayerDict["norm"]["layer"] = norm
 
         # obtain characteristics of the dataset
         num_train_examples = ds["train"].cardinality()
         num_val_examples = ds["validation"].cardinality()
-        num_test_examples = ds["test"].cardinality()
+        num_test_examples = 0
         num_total_examples = num_train_examples + num_val_examples + num_test_examples
 
         self.ds = ds
