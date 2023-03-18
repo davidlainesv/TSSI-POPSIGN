@@ -47,7 +47,7 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
           + dataset.num_val_examples)
 
     # setup optimizer
-    if config["optimizer"] == "adam":
+    if config["optimizer"] == "sgd":
         optimizer = build_sgd_optimizer(initial_learning_rate=config['initial_learning_rate'],
                                         maximal_learning_rate=config['maximal_learning_rate'],
                                         momentum=config['momentum'],
