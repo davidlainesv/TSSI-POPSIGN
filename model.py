@@ -44,7 +44,7 @@ def focal_loss(gamma=2., alpha=4.):
     return focal_loss_fixed
 
 
-def build_densenet121_model(input_shape=[None, 128, 3], dropout=0,
+def build_densenet121_model_legacy(input_shape=[None, 128, 3], dropout=0,
                             optimizer=None, pretraining=True):
     # setup model
     base_model = None
