@@ -99,7 +99,7 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
     model.fit(train_dataset,
               epochs=config['num_epochs'],
               verbose=verbose,
-              validation_data=validation_dataset,
+            #   validation_data=validation_dataset,
               callbacks=callbacks)
 
     # get the logs of the model
