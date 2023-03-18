@@ -109,7 +109,7 @@ def build_densenet121_model(input_shape=[None, 128, 3], dropout=0,
     ]
 
     # compile the model
-    if focal_loss:
+    if use_focal_loss:
         loss = focal_loss(alpha=1)
     else:
         loss = "categorical_crossentropy"
@@ -135,7 +135,7 @@ def build_efficientnet_model(input_shape=[None, 128, 3], dropout=0,
     ]
 
     # compile the model
-    if focal_loss:
+    if use_focal_loss:
         loss = focal_loss(alpha=1)
     else:
         loss = "categorical_crossentropy"
