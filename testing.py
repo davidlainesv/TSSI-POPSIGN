@@ -38,9 +38,9 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
         pipeline=config['pipeline'])
 
     # generate val dataset
-    validation_dataset = dataset.get_testing_set(
-        batch_size=config['batch_size'],
-        pipeline=config['pipeline'])
+    # validation_dataset = dataset.get_testing_set(
+    #     batch_size=config['batch_size'],
+    #     pipeline=config['pipeline'])
 
     print("[INFO] Dataset Total examples:", dataset.num_total_examples)
     print("[INFO] Dataset Training examples:", dataset.num_train_examples
