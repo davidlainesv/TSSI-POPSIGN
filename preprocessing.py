@@ -1,7 +1,5 @@
 import math
 import tensorflow as tf
-import numpy as np
-from mediapipe.python.solutions.pose import PoseLandmark
 
 
 class PadIfLessThan(tf.keras.layers.Layer):
