@@ -69,6 +69,20 @@ class Preprocessing:
             tf.math.is_nan(face),
             tf.experimental.numpy.full(tf.shape(face), nose),
             face)
+        
+        # another option
+        # left_hand = tf.where(
+        #     tf.math.is_nan(left_hand),
+        #     tf.repeat(left_wrist, 21, axis=2),
+        #     left_hand)
+        # right_hand = tf.where(
+        #     tf.math.is_nan(right_hand),
+        #     tf.repeat(right_wrist, 21, axis=2),
+        #     right_hand)
+        # face = tf.where(
+        #     tf.math.is_nan(face),
+        #     tf.repeat(nose, 468, axis=2),
+        #     face)
 
         keypoints = tf.concat([face, left_hand, body, right_hand], axis=1)
 
