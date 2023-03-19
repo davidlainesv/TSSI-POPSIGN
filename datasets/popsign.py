@@ -22,7 +22,7 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
     RELEASE_NOTES = {
         '1.0.0': 'Initial release.',
     }
-    LANDMARKS_PER_SAMPLE = 543,
+    LANDMARKS_PER_SAMPLE = 543
     INFO = pd.read_csv("train.csv", index_col=0).reset_index()
 
     def _info(self) -> tfds.core.DatasetInfo:
