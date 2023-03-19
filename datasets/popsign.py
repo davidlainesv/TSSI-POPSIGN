@@ -56,8 +56,7 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
         # Returns the Dict[split names, Iterator[Key, Example]]
         return {
             "train": self._generate_examples(extracted_path, 'train'),
-            "validation": self._generate_examples(extracted_path, 'val'),
-            "test": self._generate_examples(extracted_path, 'test')
+            "validation": self._generate_examples(extracted_path, 'val')
         }
 
     def _generate_examples(self, source_path, split, cv_split=None):
