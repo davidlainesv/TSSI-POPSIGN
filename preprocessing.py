@@ -10,7 +10,6 @@ class PadIfLessThan(tf.keras.layers.Layer):
     @tf.function
     def call(self, images):
         height = tf.shape(images)[1]
-        width = tf.shape(images)[2]
         height_pad = tf.math.maximum(0, self.frames - height)
         paddings = [[0, 0], [0, height_pad], [0, 0], [0, 0]]
         padded_images = tf.pad(images, paddings, "CONSTANT")
