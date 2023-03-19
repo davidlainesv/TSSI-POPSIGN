@@ -36,7 +36,7 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
                 # These are the features of your dataset like images, labels ...
                 'pose': tfds.features.Tensor(
                     shape=(None, self.LANDMARKS_PER_SAMPLE, 3),
-                    dtype=np.float64),
+                    dtype=np.float32),
                 'label': tfds.features.ClassLabel(
                     names=list(self.INFO["sign"].unique().astype(str)))
             }),
