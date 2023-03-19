@@ -71,6 +71,7 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
             examples = self.get_cv_split(split, cv_split)
 
         for filename, label in examples:
+            filename = "/".join(filename.split("/")[1:])
             filepath = source_path / filename
             data = self.load_relevant_data_subset(filepath)
             data = preprocessing_layer.fill_nan_values(data)
