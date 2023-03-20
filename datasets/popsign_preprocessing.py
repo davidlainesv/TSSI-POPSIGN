@@ -39,7 +39,7 @@ class Preprocessing(tf.keras.layers.Layer):
         self.root_idx = self.range_dict["root"][0]
 
     @tf.function
-    def __call__(self, keypoints):
+    def call(self, keypoints):
         # keypoints = self.batch_if_necessary(keypoints)
         keypoints = self.fill_z_with_zeros(keypoints)
         keypoints = self.fill_nan_values(keypoints)
