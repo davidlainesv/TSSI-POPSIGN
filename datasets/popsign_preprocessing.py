@@ -83,7 +83,7 @@ class Preprocessing(tf.keras.layers.Layer):
             tf.repeat(nose, 468, axis=2),
             face)
 
-        keypoints = tf.concat([face, left_hand, body, right_hand], axis=1)
+        keypoints = tf.concat([face, left_hand, body, right_hand], axis=2)
 
         return keypoints
 
