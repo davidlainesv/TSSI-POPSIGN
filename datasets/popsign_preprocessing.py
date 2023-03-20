@@ -2,7 +2,7 @@ import tensorflow as tf
 from mediapipe.python.solutions.pose import PoseLandmark
 
 
-class Preprocessing:
+class Preprocessing(tf.keras.layers.Layer):
     # original order = ['face', 'left_hand', 'pose', 'right_hand']
 
     range_dict = {
@@ -21,7 +21,8 @@ class Preprocessing:
         'root': slice(468+21+33+21, 468+21+33+21+1)
     }
 
-    def __init__(self, tssi_order):
+    def __init__(self, tssi_order, **kwargs):
+        super().__init__(**kwargs)
         joints_idxs = []
         for joint in tssi_order:
             joint_type = joint.split("_")[0]
@@ -37,70 +38,71 @@ class Preprocessing:
         self.right_wrist_idx = self.range_dict["pose"][PoseLandmark.RIGHT_WRIST]
         self.root_idx = self.range_dict["root"][0]
 
+    @tf.function
     def __call__(self, keypoints):
+        keypoints = self.batch_if_necessary(keypoints)
         keypoints = self.fill_z_with_zeros(keypoints)
         keypoints = self.fill_nan_values(keypoints)
         keypoints = self.add_root(keypoints)
         keypoints = self.sort_columns(keypoints)
         return keypoints
 
-    def fill_nan_values(self, keypoints):
-        face = keypoints[:, self.slice_dict["face"], :]
-        left_hand = keypoints[:, self.slice_dict["leftHand"], :]
-        body = keypoints[:, self.slice_dict["pose"], :]
-        right_hand = keypoints[:, self.slice_dict["rightHand"], :]
+    @tf.function
+    def batch_if_necessary(self, keypoints):
+        # usually keypoints.shape = (frames, joints, channels)
+        ndims = tf.size(tf.shape(keypoints))
+        keypoints = tf.cond(tf.equal(ndims, 3),
+                            tf.expand_dims(keypoints, 0),
+                            keypoints)
+        return keypoints
 
-        nose = keypoints[:, self.nose_idx, :]
-        nose = tf.expand_dims(nose, axis=1)
-        left_wrist = keypoints[:, self.left_wrist_idx, :]
-        left_wrist = tf.expand_dims(left_wrist, axis=1)
-        right_wrist = keypoints[:, self.right_wrist_idx, :]
-        right_wrist = tf.expand_dims(right_wrist, axis=1)
+    @tf.function
+    def fill_nan_values(self, keypoints):
+        face = keypoints[:, :, self.slice_dict["face"], :]
+        left_hand = keypoints[:, :, self.slice_dict["leftHand"], :]
+        body = keypoints[:, :, self.slice_dict["pose"], :]
+        right_hand = keypoints[:, :, self.slice_dict["rightHand"], :]
+
+        nose = keypoints[:, :, self.nose_idx, :]
+        nose = tf.expand_dims(nose, axis=2)
+        left_wrist = keypoints[:, :, self.left_wrist_idx, :]
+        left_wrist = tf.expand_dims(left_wrist, axis=2)
+        right_wrist = keypoints[:, :, self.right_wrist_idx, :]
+        right_wrist = tf.expand_dims(right_wrist, axis=2)
 
         left_hand = tf.where(
             tf.math.is_nan(left_hand),
-            tf.experimental.numpy.full(tf.shape(left_hand), left_wrist),
+            tf.repeat(left_wrist, 21, axis=2),
             left_hand)
         right_hand = tf.where(
             tf.math.is_nan(right_hand),
-            tf.experimental.numpy.full(tf.shape(right_hand), right_wrist),
+            tf.repeat(right_wrist, 21, axis=2),
             right_hand)
         face = tf.where(
             tf.math.is_nan(face),
-            tf.experimental.numpy.full(tf.shape(face), nose),
+            tf.repeat(nose, 468, axis=2),
             face)
-        
-        # another option
-        # left_hand = tf.where(
-        #     tf.math.is_nan(left_hand),
-        #     tf.repeat(left_wrist, 21, axis=2),
-        #     left_hand)
-        # right_hand = tf.where(
-        #     tf.math.is_nan(right_hand),
-        #     tf.repeat(right_wrist, 21, axis=2),
-        #     right_hand)
-        # face = tf.where(
-        #     tf.math.is_nan(face),
-        #     tf.repeat(nose, 468, axis=2),
-        #     face)
 
         keypoints = tf.concat([face, left_hand, body, right_hand], axis=1)
 
         return keypoints
 
+    @tf.function
     def fill_z_with_zeros(self, keypoints):
         x, y, _ = tf.unstack(keypoints, axis=-1)
         zeros = tf.zeros(tf.shape(x), x.dtype)
         return tf.stack([x, y, zeros], axis=-1)
 
+    @tf.function
     def add_root(self, keypoints):
-        left = keypoints[:, self.left_wrist_idx, :]
-        right = keypoints[:, self.right_wrist_idx, :]
+        left = keypoints[:, :, self.left_wrist_idx, :]
+        right = keypoints[:, :, self.right_wrist_idx, :]
         root = (left + right) / 2
-        root = tf.expand_dims(root, axis=1)
-        keypoints = tf.concat([keypoints, root], axis=1)
+        root = tf.expand_dims(root, axis=2)
+        keypoints = tf.concat([keypoints, root], axis=2)
         return keypoints
 
+    @tf.function
     def sort_columns(self, keypoints):
-        keypoints = tf.gather(keypoints, indices=self.joints_idxs, axis=1)
+        keypoints = tf.gather(keypoints, indices=self.joints_idxs, axis=2)
         return keypoints
