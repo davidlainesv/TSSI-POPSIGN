@@ -40,7 +40,7 @@ class Preprocessing(tf.keras.layers.Layer):
 
     @tf.function
     def __call__(self, keypoints):
-        keypoints = self.batch_if_necessary(keypoints)
+        # keypoints = self.batch_if_necessary(keypoints)
         keypoints = self.fill_z_with_zeros(keypoints)
         keypoints = self.fill_nan_values(keypoints)
         keypoints = self.add_root(keypoints)
