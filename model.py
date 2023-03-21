@@ -68,6 +68,7 @@ def build_densenet121_model(input_shape=[None, 135, 2], dropout=0,
         loss = focal_loss(alpha=1)
     else:
         loss = "categorical_crossentropy"
+        loss = "kullback_leibler_divergence"
 
     # compile the model
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
