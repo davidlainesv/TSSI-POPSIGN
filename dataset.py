@@ -2,7 +2,7 @@ from enum import IntEnum
 import tensorflow as tf
 from config import MAX_INPUT_HEIGHT, MIN_INPUT_HEIGHT, NUM_CLASSES
 from data_augmentation import RandomFlip, RandomScale, RandomShift, RandomRotation, RandomSpeed
-from preprocessing import Center, FillBlueWithAngle, FillZWithZeros, PadIfLessThan, ResizeIfMoreThan, TranslationScaleInvariant
+from preprocessing import Center, FillBlueWithAngle, FillZWithZeros, PadIfLessThan, RemoveZ, ResizeIfMoreThan, TranslationScaleInvariant
 import tensorflow_datasets as tfds
 
 
@@ -73,6 +73,10 @@ LayerDict = {
         'layer': tf.keras.layers.Normalization(axis=-1,
                                                mean=[248.08896, 246.56985, 0.],
                                                variance=[9022.948, 17438.518, 0.])
+    },
+    'remove_z': {
+        'type': LayerType.Normalization,
+        'layer': RemoveZ()
     }
 }
 

@@ -181,6 +181,16 @@ class FillZWithZeros(tf.keras.layers.Layer):
         return tf.stack([red, green, zeros], axis=-1)
 
 
+class RemoveZ(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @tf.function
+    def call(self, batch):
+        x, y, _ = tf.unstack(batch, axis=-1)
+        return tf.stack([x, y], axis=-1)
+
+
 class Preprocessing(tf.keras.layers.Layer):
     # original order = ['face', 'left_hand', 'pose', 'right_hand']
 
