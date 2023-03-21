@@ -173,7 +173,7 @@ if __name__ == "__main__":
                         help='Backbone method: \'densenet\', \'mobilenet\'',
                         default='densenet')
     parser.add_argument('--pretraining', type=str2bool,
-                        help='Add pretraining', default=True)
+                        help='Add pretraining', default=False)
     parser.add_argument('--augmentation', type=str2bool,
                         help='Add augmentation', default=False)
     parser.add_argument('--focal_loss', type=str2bool,
