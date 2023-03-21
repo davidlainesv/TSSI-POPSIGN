@@ -142,6 +142,7 @@ def main(args):
     optimizer = args.optimizer
     epsilon = args.epsilon
     focal_loss = args.focal_loss
+    multi_gpu = args.multi_gpu
 
     dataset = Dataset()
 
@@ -166,7 +167,8 @@ def main(args):
 
         'optimizer': optimizer,
         'epsilon': epsilon,
-        'focal_loss': focal_loss
+        'focal_loss': focal_loss,
+        'multi_gpu': multi_gpu
     }
 
     agent_fn(config=config, project=project, entity=entity, verbose=2)
