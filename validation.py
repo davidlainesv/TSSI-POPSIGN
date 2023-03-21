@@ -81,7 +81,7 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
         raise Exception("Model unknown")
 
     # Print summary of the model
-    print(model.summary())
+    model.summary()
 
     print("[INFO] Input Shape:", input_shape)
 
