@@ -207,6 +207,12 @@ class Dataset():
         if concat_validation_to_train:
             ds["train"] = ds["train"].concatenate(ds["validation"])
 
+
+        options = tf.data.Options()
+        options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.DATA
+        ds["train"] = ds["train"].with_options(options)
+        ds["validation"] = ds["validation"].with_options(options)
+
         # generate norm layer
         # norm = tf.keras.layers.Normalization(axis=-2)
         # norm.adapt(ds["train"].map(extract_pose,
