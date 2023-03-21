@@ -70,7 +70,7 @@ def build_densenet121_model(input_shape=[None, 135, 2], dropout=0,
         loss = "categorical_crossentropy"
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
-    return model, None
+    return model
 
 
 def build_efficientnet_model(input_shape=[None, 128, 3], dropout=0,
