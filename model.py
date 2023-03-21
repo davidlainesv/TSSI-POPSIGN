@@ -11,7 +11,6 @@ from tensorflow.keras.models import Model
 
 
 def focal_loss(gamma=2., alpha=4.):
-
     gamma = float(gamma)
     alpha = float(alpha)
 
@@ -33,9 +32,6 @@ def focal_loss(gamma=2., alpha=4.):
             [tensor] -- loss.
         """
         epsilon = 1.e-9
-        # y_true = tf.convert_to_tensor(y_true, tf.float32)
-        # y_pred = tf.convert_to_tensor(y_pred, tf.float32)
-
         model_out = tf.math.add(y_pred, epsilon)
         ce = tf.math.multiply(y_true, -tf.math.log(model_out))
         weight = tf.math.multiply(y_true, tf.math.pow(
@@ -47,7 +43,8 @@ def focal_loss(gamma=2., alpha=4.):
 
 
 def build_densenet121_model(input_shape=[None, 135, 2], dropout=0,
-                            optimizer=None, pretraining=True, use_focal_loss=False):
+                            optimizer=None, pretraining=True,
+                            use_loss="crossentroypy"):
     # setup model
     weights = 'imagenet' if pretraining else None
     inputs = Input(shape=input_shape)
@@ -64,10 +61,14 @@ def build_densenet121_model(input_shape=[None, 135, 2], dropout=0,
     ]
 
     # setup the loss
-    if use_focal_loss:
+    if use_loss == "focal":
         loss = focal_loss(alpha=1)
-    else:
+    elif use_loss == "crossentropy":
         loss = "categorical_crossentropy"
+    elif use_loss == "kl_divergence":
+        loss = "kullback_leibler_divergence"
+    else:
+        raise Exception("Loss unknown")
 
     # compile the model
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)

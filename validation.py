@@ -68,14 +68,14 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
                                         dropout=config['dropout'],
                                         optimizer=optimizer,
                                         pretraining=config['pretraining'],
-                                        use_focal_loss=config['focal_loss'])
+                                        use_loss=config['use_loss'])
 
     elif config['backbone'] == "efficientnet":
         model = build_efficientnet_model(input_shape=input_shape,
                                          dropout=config['dropout'],
                                          optimizer=optimizer,
                                          pretraining=config['pretraining'],
-                                         use_focal_loss=config['focal_loss'])
+                                         use_loss=config['use_loss'])
 
     else:
         raise Exception("Model unknown")
@@ -130,7 +130,7 @@ def main(args):
     pipeline = args.pipeline
     optimizer = args.optimizer
     epsilon = args.epsilon
-    focal_loss = args.focal_loss
+    use_loss = args.use_loss
 
     dataset = Dataset()
 
@@ -155,7 +155,7 @@ def main(args):
 
         'optimizer': optimizer,
         'epsilon': epsilon,
-        'focal_loss': focal_loss
+        'use_loss': use_loss
     }
 
     agent_fn(config=config, project=project, entity=entity, verbose=2)
@@ -194,6 +194,8 @@ if __name__ == "__main__":
                         help='Number of epochs', default=24)
     parser.add_argument('--pipeline', type=str,
                         help='Pipeline', default="default")
+    parser.add_argument('--use_loss', type=str,
+                        help='Loss to use', default="crossentropy")
     args = parser.parse_args()
 
     print(args)
