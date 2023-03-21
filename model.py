@@ -33,8 +33,8 @@ def focal_loss(gamma=2., alpha=4.):
             [tensor] -- loss.
         """
         epsilon = 1.e-9
-        y_true = tf.convert_to_tensor(y_true, tf.float32)
-        y_pred = tf.convert_to_tensor(y_pred, tf.float32)
+        # y_true = tf.convert_to_tensor(y_true, tf.float32)
+        # y_pred = tf.convert_to_tensor(y_pred, tf.float32)
 
         model_out = tf.math.add(y_pred, epsilon)
         ce = tf.math.multiply(y_true, -tf.math.log(model_out))
