@@ -195,7 +195,7 @@ if __name__ == "__main__":
     parser.add_argument('--pipeline', type=str,
                         help='Pipeline', default="default")
     parser.add_argument('--use_loss', type=str,
-                        help='Loss to use', default="crossentropy")
+                        help='Loss function', default="crossentropy")
     args = parser.parse_args()
 
     print(args)
