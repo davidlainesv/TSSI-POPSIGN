@@ -245,7 +245,7 @@ class Dataset():
             batch = FillZWithZeros()(batch)
             batch = preprocessing_pipeline(batch, training=True)
             x = tf.ensure_shape(
-                batch[0], [MIN_INPUT_HEIGHT, self.input_width, 3])
+                batch[0], [MIN_INPUT_HEIGHT, self.input_width, 2])
             return x, y
 
         train_ds = self.ds["train"]
