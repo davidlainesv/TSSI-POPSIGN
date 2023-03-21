@@ -1,11 +1,12 @@
 from config import NUM_CLASSES
 import tensorflow as tf
 from efficient_net_b0 import EfficientNetB0
+from densenet import DenseNet121
 from tensorflow.keras.metrics import TopKCategoricalAccuracy
 from tensorflow.keras.layers import Dropout, Dense
 from tensorflow.keras import Input
 from tensorflow.keras.models import Model
-from tensorflow.keras.applications.densenet import DenseNet121
+# from tensorflow.keras.applications.densenet import DenseNet121
 # from tensorflow.keras.applications.efficientnet import EfficientNetB0
 
 
@@ -37,7 +38,8 @@ def focal_loss(gamma=2., alpha=4.):
 
         model_out = tf.math.add(y_pred, epsilon)
         ce = tf.math.multiply(y_true, -tf.math.log(model_out))
-        weight = tf.math.multiply(y_true, tf.math.pow(tf.math.subtract(1., model_out), gamma))
+        weight = tf.math.multiply(y_true, tf.math.pow(
+            tf.math.subtract(1., model_out), gamma))
         fl = tf.math.multiply(alpha, tf.math.multiply(weight, ce))
         reduced_fl = tf.reduce_max(fl, axis=1)
         return tf.reduce_mean(reduced_fl)
@@ -45,7 +47,7 @@ def focal_loss(gamma=2., alpha=4.):
 
 
 def build_densenet121_model_legacy(input_shape=[None, 128, 3], dropout=0,
-                            optimizer=None, pretraining=True):
+                                   optimizer=None, pretraining=True):
     # setup model
     base_model = None
     if pretraining:
