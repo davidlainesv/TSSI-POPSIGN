@@ -64,22 +64,11 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
     # setup model
     input_shape = [None, dataset.input_width, 2]
     if config['backbone'] == "densenet":
-        if config["multi_gpu"]:
-            strategy = tf.distribute.MirroredStrategy()
-            print('Number of devices: {}'.format(
-                strategy.num_replicas_in_sync))
-            with strategy.scope():
-                model = build_densenet121_model(input_shape=input_shape,
-                                                dropout=config['dropout'],
-                                                optimizer=optimizer,
-                                                pretraining=config['pretraining'],
-                                                use_focal_loss=config['focal_loss'])
-        else:
-            model = build_densenet121_model(input_shape=input_shape,
-                                            dropout=config['dropout'],
-                                            optimizer=optimizer,
-                                            pretraining=config['pretraining'],
-                                            use_focal_loss=config['focal_loss'])
+        model = build_densenet121_model(input_shape=input_shape,
+                                        dropout=config['dropout'],
+                                        optimizer=optimizer,
+                                        pretraining=config['pretraining'],
+                                        use_focal_loss=config['focal_loss'])
 
     elif config['backbone'] == "efficientnet":
         model = build_efficientnet_model(input_shape=input_shape,
@@ -142,7 +131,6 @@ def main(args):
     optimizer = args.optimizer
     epsilon = args.epsilon
     focal_loss = args.focal_loss
-    multi_gpu = args.multi_gpu
 
     dataset = Dataset()
 
@@ -167,8 +155,7 @@ def main(args):
 
         'optimizer': optimizer,
         'epsilon': epsilon,
-        'focal_loss': focal_loss,
-        'multi_gpu': multi_gpu
+        'focal_loss': focal_loss
     }
 
     agent_fn(config=config, project=project, entity=entity, verbose=2)
@@ -207,8 +194,6 @@ if __name__ == "__main__":
                         help='Number of epochs', default=24)
     parser.add_argument('--pipeline', type=str,
                         help='Pipeline', default="default")
-    parser.add_argument('--multi_gpu', type=str2bool,
-                        help='Multi-GPU enabled', default=False)
     args = parser.parse_args()
 
     print(args)
