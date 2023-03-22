@@ -3,6 +3,23 @@ import tensorflow as tf
 from mediapipe.python.solutions.pose import PoseLandmark
 
 
+RANGE_DICT = {
+    'face': range(0, 468),
+    'leftHand': range(468, 468+21),
+    'pose': range(468+21, 468+21+33),
+    'rightHand': range(468+21+33, 468+21+33+21),
+    'root': range(468+21+33+21, 468+21+33+21+1)
+}
+
+SLICE_DICT = {
+    'face': slice(0, 468),
+    'leftHand': slice(468, 468+21),
+    'pose': slice(468+21, 468+21+33),
+    'rightHand': slice(468+21+33, 468+21+33+21),
+    'root': slice(468+21+33+21, 468+21+33+21+1)
+}
+
+
 class PadIfLessThan(tf.keras.layers.Layer):
     def __init__(self, frames=128, **kwargs):
         super().__init__(**kwargs)
@@ -161,7 +178,7 @@ class FillBlueWithAngle(tf.keras.layers.Layer):
         batch = tf.cast(batch, tf.float32)
         unstacked = tf.unstack(batch, axis=-1)
         x, y = unstacked[self.x_channel], unstacked[self.y_channel]
-        angles = tf.math.atan2(y, x) * (180 / math.pi) % 360
+        angles = tf.math.multiply(tf.math.atan2(y, x), (180 / math.pi)) % 360
         data_min, data_max = 0, 359
         range_min, range_max = self.scale_to
         std = (angles - data_min) / (data_max - data_min)
@@ -176,9 +193,9 @@ class FillZWithZeros(tf.keras.layers.Layer):
 
     @tf.function
     def call(self, batch):
-        [red, green, _] = tf.unstack(batch, axis=-1)
-        zeros = tf.zeros(tf.shape(red), dtype=red.dtype)
-        return tf.stack([red, green, zeros], axis=-1)
+        x, y, _ = tf.unstack(batch, axis=-1)
+        zeros = tf.zeros(tf.shape(x), dtype=x.dtype)
+        return tf.stack([x, y, zeros], axis=-1)
 
 
 class RemoveZ(tf.keras.layers.Layer):
@@ -191,25 +208,23 @@ class RemoveZ(tf.keras.layers.Layer):
         return tf.stack([x, y], axis=-1)
 
 
-class Preprocessing(tf.keras.layers.Layer):
-    # original order = ['face', 'left_hand', 'pose', 'right_hand']
+class AddRoot(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.left_shoulder = RANGE_DICT["pose"][PoseLandmark.LEFT_SHOULDER]
+        self.right_shoulder = RANGE_DICT["pose"][PoseLandmark.RIGHT_SHOULDER]
 
-    range_dict = {
-        'face': range(0, 468),
-        'leftHand': range(468, 468+21),
-        'pose': range(468+21, 468+21+33),
-        'rightHand': range(468+21+33, 468+21+33+21),
-        'root': range(468+21+33+21, 468+21+33+21+1)
-    }
+    @tf.function
+    def call(self, batch):
+        left = batch[:, :, self.left_shoulder, :]
+        right = batch[:, :, self.right_shoulder, :]
+        root = (left + right) / 2
+        root = tf.expand_dims(root, axis=2)
+        batch = tf.concat([batch, root], axis=2)
+        return batch
 
-    slice_dict = {
-        'face': slice(0, 468),
-        'leftHand': slice(468, 468+21),
-        'pose': slice(468+21, 468+21+33),
-        'rightHand': slice(468+21+33, 468+21+33+21),
-        'root': slice(468+21+33+21, 468+21+33+21+1)
-    }
 
+class SortColumns(tf.keras.layers.Layer):
     def __init__(self, tssi_order, **kwargs):
         super().__init__(**kwargs)
         joints_idxs = []
@@ -219,39 +234,29 @@ class Preprocessing(tf.keras.layers.Layer):
                 landmark_id = 0
             else:
                 landmark_id = int(joint.split("_")[1])
-            idx = self.range_dict[joint_type][landmark_id]
+            idx = RANGE_DICT[joint_type][landmark_id]
             joints_idxs.append(idx)
         self.joints_idxs = joints_idxs
-        self.nose_idx = self.range_dict["pose"][PoseLandmark.NOSE]
-        self.left_wrist_idx = self.range_dict["pose"][PoseLandmark.LEFT_WRIST]
-        self.right_wrist_idx = self.range_dict["pose"][PoseLandmark.RIGHT_WRIST]
-        self.root_idx = self.range_dict["root"][0]
 
     @tf.function
     def call(self, keypoints):
-        # keypoints = self.batch_if_necessary(keypoints)
-        # keypoints = self.fill_z_with_zeros(keypoints)
-        keypoints = self.remove_z(keypoints)
-        keypoints = self.fill_nan_values(keypoints)
-        keypoints = self.add_root(keypoints)
-        keypoints = self.sort_columns(keypoints)
+        keypoints = tf.gather(keypoints, indices=self.joints_idxs, axis=2)
         return keypoints
 
-    @tf.function
-    def batch_if_necessary(self, keypoints):
-        # usually keypoints.shape = (frames, joints, channels)
-        ndims = tf.size(tf.shape(keypoints))
-        keypoints = tf.cond(tf.equal(ndims, 3),
-                            tf.expand_dims(keypoints, 0),
-                            keypoints)
-        return keypoints
+
+class FillNaNValues(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.nose_idx = RANGE_DICT["pose"][PoseLandmark.NOSE]
+        self.left_wrist_idx = RANGE_DICT["pose"][PoseLandmark.LEFT_WRIST]
+        self.right_wrist_idx = RANGE_DICT["pose"][PoseLandmark.RIGHT_WRIST]
 
     @tf.function
-    def fill_nan_values(self, keypoints):
-        face = keypoints[:, :, self.slice_dict["face"], :]
-        left_hand = keypoints[:, :, self.slice_dict["leftHand"], :]
-        body = keypoints[:, :, self.slice_dict["pose"], :]
-        right_hand = keypoints[:, :, self.slice_dict["rightHand"], :]
+    def call(self, keypoints):
+        face = keypoints[:, :, SLICE_DICT["face"], :]
+        left_hand = keypoints[:, :, SLICE_DICT["leftHand"], :]
+        pose = keypoints[:, :, SLICE_DICT["pose"], :]
+        right_hand = keypoints[:, :, SLICE_DICT["rightHand"], :]
 
         nose = keypoints[:, :, self.nose_idx, :]
         nose = tf.expand_dims(nose, axis=2)
@@ -273,31 +278,25 @@ class Preprocessing(tf.keras.layers.Layer):
             tf.repeat(nose, 468, axis=2),
             face)
 
-        keypoints = tf.concat([face, left_hand, body, right_hand], axis=2)
+        keypoints = tf.concat([face, left_hand, pose, right_hand], axis=2)
 
         return keypoints
 
-    @tf.function
-    def remove_z(self, keypoints):
-        x, y, _ = tf.unstack(keypoints, axis=-1)
-        return tf.stack([x, y], axis=-1)
+
+class Batch(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @tf.function
-    def fill_z_with_zeros(self, keypoints):
-        x, y, _ = tf.unstack(keypoints, axis=-1)
-        zeros = tf.zeros(tf.shape(x), x.dtype)
-        return tf.stack([x, y, zeros], axis=-1)
-
-    @tf.function
-    def add_root(self, keypoints):
-        left = keypoints[:, :, self.left_wrist_idx, :]
-        right = keypoints[:, :, self.right_wrist_idx, :]
-        root = (left + right) / 2
-        root = tf.expand_dims(root, axis=2)
-        keypoints = tf.concat([keypoints, root], axis=2)
+    def call(self, keypoints):
+        keypoints = tf.expand_dims(keypoints, 0)
         return keypoints
 
+
+class Unbatch(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
     @tf.function
-    def sort_columns(self, keypoints):
-        keypoints = tf.gather(keypoints, indices=self.joints_idxs, axis=2)
-        return keypoints
+    def call(self, keypoints):
+        return keypoints[0]
