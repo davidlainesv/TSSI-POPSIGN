@@ -20,7 +20,6 @@ Reference:
       https://arxiv.org/abs/1608.06993) (CVPR 2017)
 """
 
-from attention_module import attach_attention_module
 import tensorflow.compat.v2 as tf
 
 from keras import backend
@@ -32,6 +31,8 @@ from keras.utils import layer_utils
 
 # isort: off
 from tensorflow.python.util.tf_export import keras_export
+
+from attention_module import attach_attention_module
 
 BASE_WEIGHTS_PATH = (
     "https://storage.googleapis.com/tensorflow/keras-applications/densenet/"
