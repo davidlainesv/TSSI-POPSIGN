@@ -1,6 +1,5 @@
 """popsign dataset."""
 
-from preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
 from pathlib import Path
 import tensorflow as tf
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
@@ -11,7 +10,7 @@ import json
 import sys
 
 sys.path.insert(0, "../")
-
+from preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
 
 # Markdown description  that will appear on the catalog page.
 _DESCRIPTION = """
