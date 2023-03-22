@@ -10,7 +10,7 @@ from urls import TRAIN_LANDMARK_FILES_URL
 import sys
 
 sys.path.insert(0, "../")
-from ..preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
+from preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
 
 
 # Markdown description  that will appear on the catalog page.
