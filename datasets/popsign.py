@@ -1,16 +1,16 @@
 """popsign dataset."""
 
+from preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
+from pathlib import Path
 import tensorflow as tf
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 import tensorflow_datasets as tfds
 import pandas as pd
 import numpy as np
 import json
-from urls import TRAIN_LANDMARK_FILES_URL
 import sys
 
 sys.path.insert(0, "../")
-from preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
 
 
 # Markdown description  that will appear on the catalog page.
@@ -23,7 +23,6 @@ It contains 250 signs across 94477 videos in total.
 def get_dataset_list():
     df = pd.read_csv("train.csv", index_col=0)
     df = df.reset_index()
-    df["path"] = df["path"].str.replace("train_landmark_files/", "")
     return df
 
 
@@ -69,13 +68,12 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager: tfds.download.DownloadManager):
         """Returns SplitGenerators."""
 
-        extracted_path = dl_manager.download_and_extract(
-            TRAIN_LANDMARK_FILES_URL)
+        source_path = Path("./asl-signs")
 
         # Returns the Dict[split names, Iterator[Key, Example]]
         return {
-            "train": self._generate_examples(extracted_path, 'train'),
-            "validation": self._generate_examples(extracted_path, 'val')
+            "train": self._generate_examples(source_path, 'train'),
+            "validation": self._generate_examples(source_path, 'val')
         }
 
     def _generate_examples(self, source_path, split, cv_split=None):
