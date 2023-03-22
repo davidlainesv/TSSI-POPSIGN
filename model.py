@@ -44,13 +44,16 @@ def focal_loss(gamma=2., alpha=4.):
 
 def build_densenet121_model(input_shape=[None, 135, 2], dropout=0,
                             optimizer=None, pretraining=True,
-                            use_loss="crossentroypy"):
+                            use_loss="crossentroypy", growth_rate=12,
+                            attention=None):
     # setup model
     weights = 'imagenet' if pretraining else None
     inputs = Input(shape=input_shape)
 
     x = DenseNet121(input_shape=input_shape, weights=weights,
-                    include_top=False, pooling='avg')(inputs)
+                    include_top=False, pooling='avg',
+                    growth_rate=growth_rate,
+                    attention=attention)(inputs)
     x = Dropout(dropout)(x)
     predictions = Dense(NUM_CLASSES, activation='softmax')(x)
     model = Model(inputs=inputs, outputs=predictions)
