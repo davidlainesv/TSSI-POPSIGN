@@ -20,6 +20,7 @@ Reference:
       https://arxiv.org/abs/1608.06993) (CVPR 2017)
 """
 
+from attention_module import attach_attention_module
 import tensorflow.compat.v2 as tf
 
 from keras import backend
@@ -60,7 +61,7 @@ DENSENET201_WEIGHT_PATH_NO_TOP = (
 layers = VersionAwareLayers()
 
 
-def dense_block(x, blocks, name):
+def dense_block(x, blocks, growth_rate, name, attention=None):
     """A dense block.
 
     Args:
@@ -72,11 +73,16 @@ def dense_block(x, blocks, name):
       Output tensor for the block.
     """
     for i in range(blocks):
-        x = conv_block(x, 12, name=name + "_block" + str(i + 1))
+        x = conv_block(x, growth_rate, name=name + "_block" + str(i + 1))
+
+    # attention
+    if attention is not None:
+        x = attach_attention_module(x, attention)
+
     return x
 
 
-def transition_block(x, reduction, name):
+def transition_block(x, reduction, name, attention=None):
     """A transition block.
 
     Args:
@@ -99,6 +105,11 @@ def transition_block(x, reduction, name):
         name=name + "_conv",
     )(x)
     x = layers.AveragePooling2D(2, strides=2, name=name + "_pool")(x)
+
+    # attention
+    if attention is not None:
+        x = attach_attention_module(x, attention)
+
     return x
 
 
@@ -141,6 +152,8 @@ def DenseNet(
     pooling=None,
     classes=1000,
     classifier_activation="softmax",
+    growth_rate=12,
+    attention=None
 ):
     """Instantiates the DenseNet architecture.
 
@@ -248,13 +261,17 @@ def DenseNet(
     x = layers.ZeroPadding2D(padding=((1, 1), (1, 1)))(x)
     x = layers.MaxPooling2D(3, strides=2, name="pool1")(x)
 
-    x = dense_block(x, blocks[0], name="conv2")
-    x = transition_block(x, 0.5, name="pool2")
-    x = dense_block(x, blocks[1], name="conv3")
-    x = transition_block(x, 0.5, name="pool3")
-    x = dense_block(x, blocks[2], name="conv4")
-    x = transition_block(x, 0.5, name="pool4")
-    x = dense_block(x, blocks[3], name="conv5")
+    x = dense_block(x, blocks[0], growth_rate,
+                    name="conv2", attention=attention)
+    x = transition_block(x, 0.5, name="pool2", attention=attention)
+    x = dense_block(x, blocks[1], growth_rate,
+                    name="conv3", attention=attention)
+    x = transition_block(x, 0.5, name="pool3", attention=attention)
+    x = dense_block(x, blocks[2], growth_rate,
+                    name="conv4", attention=attention)
+    x = transition_block(x, 0.5, name="pool4", attention=attention)
+    x = dense_block(x, blocks[3], growth_rate,
+                    name="conv5", attention=attention)
 
     x = layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name="bn")(x)
     x = layers.Activation("relu", name="relu")(x)
@@ -353,6 +370,8 @@ def DenseNet121(
     pooling=None,
     classes=1000,
     classifier_activation="softmax",
+    growth_rate=12,
+    attention=None
 ):
     """Instantiates the Densenet121 architecture."""
     return DenseNet(
@@ -364,6 +383,8 @@ def DenseNet121(
         pooling,
         classes,
         classifier_activation,
+        growth_rate,
+        attention
     )
 
 
@@ -378,6 +399,8 @@ def DenseNet169(
     pooling=None,
     classes=1000,
     classifier_activation="softmax",
+    growth_rate=12,
+    attention=None
 ):
     """Instantiates the Densenet169 architecture."""
     return DenseNet(
@@ -389,6 +412,8 @@ def DenseNet169(
         pooling,
         classes,
         classifier_activation,
+        growth_rate,
+        attention
     )
 
 
@@ -403,6 +428,8 @@ def DenseNet201(
     pooling=None,
     classes=1000,
     classifier_activation="softmax",
+    growth_rate=12,
+    attention=None
 ):
     """Instantiates the Densenet201 architecture."""
     return DenseNet(
@@ -414,6 +441,8 @@ def DenseNet201(
         pooling,
         classes,
         classifier_activation,
+        growth_rate,
+        attention
     )
 
 
