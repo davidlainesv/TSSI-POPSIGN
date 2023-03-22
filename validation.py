@@ -68,7 +68,9 @@ def run_experiment(config=None, log_to_wandb=True, verbose=0):
                                         dropout=config['dropout'],
                                         optimizer=optimizer,
                                         pretraining=config['pretraining'],
-                                        use_loss=config['use_loss'])
+                                        use_loss=config['use_loss'],
+                                        growth_rate=config['growth_rate'],
+                                        attention=config['use_attention'])
 
     elif config['backbone'] == "efficientnet":
         model = build_efficientnet_model(input_shape=input_shape,
@@ -131,6 +133,8 @@ def main(args):
     optimizer = args.optimizer
     epsilon = args.epsilon
     use_loss = args.use_loss
+    growth_rate = args.growth_rate
+    use_attention = args.use_attention
 
     dataset = Dataset()
 
@@ -155,7 +159,10 @@ def main(args):
 
         'optimizer': optimizer,
         'epsilon': epsilon,
-        'use_loss': use_loss
+        'use_loss': use_loss,
+
+        'growth_rate': growth_rate,
+        'use_attention': use_attention
     }
 
     agent_fn(config=config, project=project, entity=entity, verbose=2)
@@ -196,6 +203,11 @@ if __name__ == "__main__":
                         help='Pipeline', default="default")
     parser.add_argument('--use_loss', type=str,
                         help='Loss function', default="crossentropy")
+    parser.add_argument('--growth_rate', type=int,
+                        help='Growth rate of DenseNet-121', default=12)
+    parser.add_argument('--use_attention', type=str,
+                        help='Attention module: \'se\', \'cbam\'',
+                        default=None)
     args = parser.parse_args()
 
     print(args)
