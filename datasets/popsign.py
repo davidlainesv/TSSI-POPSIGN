@@ -1,7 +1,7 @@
 """popsign dataset."""
 
 import tensorflow as tf
-from preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
+from ..preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 import tensorflow_datasets as tfds
 import pandas as pd
