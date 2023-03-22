@@ -1,3 +1,3 @@
 export KAGGLE_USERNAME=davidlainesv
-export KAGGLE_KEY=d21c4cc03fa8addfed412793480703e0
+export KAGGLE_KEY=4adf7ff84f13a31bb82d7941d01db38a
 kaggle competitions download asl-signs
