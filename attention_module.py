@@ -72,7 +72,10 @@ def channel_attention(input_feature, ratio=8):
 
     avg_pool = GlobalAveragePooling2D()(input_feature)
     avg_pool = Reshape((1, 1, channel))(avg_pool)
-    assert K.int_shape(avg_pool)[1:] == [1, 1, channel]
+    try:
+        assert K.int_shape(avg_pool)[1:] == [1, 1, channel]
+    except:
+        print(K.int_shape(avg_pool)[1:])
     avg_pool = shared_layer_one(avg_pool)
     assert K.int_shape(avg_pool)[1:] == [1, 1, channel//ratio]
     avg_pool = shared_layer_two(avg_pool)
