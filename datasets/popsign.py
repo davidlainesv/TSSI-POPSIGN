@@ -1,10 +1,12 @@
 """popsign dataset."""
 
+import tensorflow as tf
+from preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 import tensorflow_datasets as tfds
 import pandas as pd
 import numpy as np
-from popsign_preprocessing import Preprocessing
+import json
 from urls import TRAIN_LANDMARK_FILES_URL
 
 
@@ -15,6 +17,21 @@ It contains 250 signs across 94477 videos in total.
 """
 
 
+def get_dataset_list():
+    df = pd.read_csv("train.csv", index_col=0)
+    df = df.reset_index()
+    df["path"] = df["path"].str.replace("train_landmark_files/", "")
+    return df
+
+
+def get_sign_list():
+    f = open("sign_to_prediction_index_map.json")
+    sign_dict = json.load(f)
+    sorted_sign_items = sorted(sign_dict.items(), key=lambda x: x[1])
+    sign_list = [item[0] for item in sorted_sign_items]
+    return sign_list
+
+
 class PopSign(tfds.core.GeneratorBasedBuilder):
     """DatasetBuilder for popsign dataset."""
 
@@ -23,7 +40,9 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
         '1.0.0': 'Initial release.',
     }
     LANDMARKS_PER_SAMPLE = 543
-    INFO = pd.read_csv("train.csv", index_col=0).reset_index()
+    DATASET_LIST = get_dataset_list()
+    SIGN_LIST = get_sign_list()
+    DATA_SHAPE = (None, LANDMARKS_PER_SAMPLE, 2)
 
     def _info(self) -> tfds.core.DatasetInfo:
         """Returns the dataset metadata."""
@@ -34,16 +53,13 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=tfds.features.FeaturesDict({
                 # These are the features of your dataset like images, labels ...
-                'pose': tfds.features.Tensor(
-                    shape=(None, self.LANDMARKS_PER_SAMPLE, 3),
-                    dtype=np.float32),
-                'label': tfds.features.ClassLabel(
-                    names=list(self.INFO["sign"].unique().astype(str)))
+                'data': tfds.features.Tensor(shape=self.DATA_SHAPE, dtype=np.float32),
+                'label': tfds.features.ClassLabel(names=self.SIGN_LIST)
             }),
             # If there's a common (input, target) tuple from the
             # features, specify them here. They'll be used if
             # `as_supervised=True` in `builder.as_dataset`.
-            supervised_keys=('pose', 'label'),  # Set to `None` to disable
+            supervised_keys=('data', 'label'),  # Set to `None` to disable
             homepage='https://www.kaggle.com/competitions/asl-signs/data'
         )
 
@@ -62,7 +78,12 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
     def _generate_examples(self, source_path, split, cv_split=None):
         """Generator of examples for each split."""
 
-        preprocessing_layer = Preprocessing([])
+        preprocessing_pipeline = tf.keras.Sequential([
+            Batch(),
+            RemoveZ(),
+            FillNaNValues(),
+            Unbatch()
+        ])
 
         if cv_split is None:
             examples = self.get_split(split)
@@ -70,14 +91,13 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
             examples = self.get_cv_split(split, cv_split)
 
         for filename, label in examples:
-            filename = "/".join(filename.split("/")[1:])
             filepath = source_path / filename
             data = self.load_relevant_data_subset(filepath)
-            data = preprocessing_layer.fill_nan_values(data)
+            data = preprocessing_pipeline(data)
 
             # Yields (key, example)
             yield filename, {
-                'pose': data.numpy(),
+                'data': data.numpy(),
                 'label': label
             }
 
@@ -99,16 +119,16 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
         sss = StratifiedShuffleSplit(n_splits=1,
                                      test_size=0.2,
                                      random_state=0)
-        filenames = self.INFO["path"]
-        labels = self.INFO["sign"]
+        filenames = self.DATASET_LIST["path"]
+        labels = self.DATASET_LIST["sign"]
         splits = list(sss.split(filenames, labels))
         train_indices, test_indices = splits[0]
         if split == "train":
-            filenames = self.INFO.loc[train_indices, "path"]
-            labels = self.INFO.loc[train_indices, "sign"]
+            filenames = self.DATASET_LIST.loc[train_indices, "path"]
+            labels = self.DATASET_LIST.loc[train_indices, "sign"]
         else:
-            filenames = self.INFO.loc[test_indices, "path"]
-            labels = self.INFO.loc[test_indices, "sign"]
+            filenames = self.DATASET_LIST.loc[test_indices, "path"]
+            labels = self.DATASET_LIST.loc[test_indices, "sign"]
         return zip(filenames, labels)
 
     def get_cv_split(self, split, cv_split):
@@ -119,14 +139,14 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
         skf = StratifiedKFold(n_splits=5,
                               random_state=0,
                               shuffle=True)
-        filenames = self.INFO["path"]
-        labels = self.INFO["sign"]
+        filenames = self.DATASET_LIST["path"]
+        labels = self.DATASET_LIST["sign"]
         splits = list(skf.split(filenames, labels))
         train_indices, test_indices = splits[cv_split-1]
         if split == "train":
-            filenames = self.INFO.loc[train_indices, "path"]
-            labels = self.INFO.loc[train_indices, "sign"]
+            filenames = self.DATASET_LIST.loc[train_indices, "path"]
+            labels = self.DATASET_LIST.loc[train_indices, "sign"]
         else:
-            filenames = self.INFO.loc[test_indices, "path"]
-            labels = self.INFO.loc[test_indices, "sign"]
+            filenames = self.DATASET_LIST.loc[test_indices, "path"]
+            labels = self.DATASET_LIST.loc[test_indices, "sign"]
         return zip(filenames, labels)
