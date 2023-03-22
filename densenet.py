@@ -264,13 +264,13 @@ def DenseNet(
 
     x = dense_block(x, blocks[0], growth_rate,
                     name="conv2", attention=attention)
-    x = transition_block(x, 0.5, name="pool2", attention=attention)
+    x = transition_block(x, 0.5, name="pool2", attention=None)
     x = dense_block(x, blocks[1], growth_rate,
                     name="conv3", attention=attention)
-    x = transition_block(x, 0.5, name="pool3", attention=attention)
+    x = transition_block(x, 0.5, name="pool3", attention=None)
     x = dense_block(x, blocks[2], growth_rate,
                     name="conv4", attention=attention)
-    x = transition_block(x, 0.5, name="pool4", attention=attention)
+    x = transition_block(x, 0.5, name="pool4", attention=None)
     x = dense_block(x, blocks[3], growth_rate,
                     name="conv5", attention=attention)
 
