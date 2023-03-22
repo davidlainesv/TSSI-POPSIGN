@@ -99,10 +99,10 @@ def spatial_attention(input_feature):
     kernel_size = 7
 
     if K.image_data_format() == "channels_first":
-        channel = input_feature._keras_shape[1]
+        channel = K.input_shape(input_feature)[1]
         cbam_feature = Permute((2, 3, 1))(input_feature)
     else:
-        channel = input_feature._keras_shape[-1]
+        channel = K.input_shape(input_feature)[-1]
         cbam_feature = input_feature
 
     avg_pool = Lambda(lambda x: K.mean(x, axis=3, keepdims=True))(cbam_feature)
