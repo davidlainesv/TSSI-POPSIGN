@@ -20,7 +20,7 @@ def se_block(input_feature, ratio=8):
     """
 
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
-    channel = input_feature._keras_shape[channel_axis]
+    channel = K.int_shape(input_feature)[channel_axis]
 
     se_feature = GlobalAveragePooling2D()(input_feature)
     se_feature = Reshape((1, 1, channel))(se_feature)
@@ -57,7 +57,8 @@ def cbam_block(cbam_feature, ratio=8):
 def channel_attention(input_feature, ratio=8):
 
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
-    channel = input_feature._keras_shape[channel_axis]
+    # channel = input_feature._keras_shape[channel_axis]
+    channel = K.int_shape(input_feature)[channel_axis]
 
     shared_layer_one = Dense(channel//ratio,
                              activation='relu',
@@ -71,19 +72,19 @@ def channel_attention(input_feature, ratio=8):
 
     avg_pool = GlobalAveragePooling2D()(input_feature)
     avg_pool = Reshape((1, 1, channel))(avg_pool)
-    assert avg_pool._keras_shape[1:] == (1, 1, channel)
+    assert K.int_shape(avg_pool)[1:] == [1, 1, channel]
     avg_pool = shared_layer_one(avg_pool)
-    assert avg_pool._keras_shape[1:] == (1, 1, channel//ratio)
+    assert K.int_shape(avg_pool)[1:] == [1, 1, channel//ratio]
     avg_pool = shared_layer_two(avg_pool)
-    assert avg_pool._keras_shape[1:] == (1, 1, channel)
+    assert K.int_shape(avg_pool)[1:] == [1, 1, channel]
 
     max_pool = GlobalMaxPooling2D()(input_feature)
     max_pool = Reshape((1, 1, channel))(max_pool)
-    assert max_pool._keras_shape[1:] == (1, 1, channel)
+    assert K.int_shape(max_pool)[1:] == [1, 1, channel]
     max_pool = shared_layer_one(max_pool)
-    assert max_pool._keras_shape[1:] == (1, 1, channel//ratio)
+    assert K.int_shape(max_pool)[1:] == [1, 1, channel//ratio]
     max_pool = shared_layer_two(max_pool)
-    assert max_pool._keras_shape[1:] == (1, 1, channel)
+    assert K.int_shape(max_pool)[1:] == [1, 1, channel]
 
     cbam_feature = Add()([avg_pool, max_pool])
     cbam_feature = Activation('sigmoid')(cbam_feature)
