@@ -1,13 +1,16 @@
 """popsign dataset."""
 
 import tensorflow as tf
-from ..preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 import tensorflow_datasets as tfds
 import pandas as pd
 import numpy as np
 import json
 from urls import TRAIN_LANDMARK_FILES_URL
+import sys
+
+sys.path.insert(0, "../")
+from ..preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
 
 
 # Markdown description  that will appear on the catalog page.
