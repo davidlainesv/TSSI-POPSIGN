@@ -1,7 +1,7 @@
 from enum import IntEnum
 import tensorflow as tf
 from config import MAX_INPUT_HEIGHT, MAX_LENGTH_IN_DATASET, MIN_INPUT_HEIGHT, NUM_CLASSES
-from data_augmentation import RandomFlip, RandomScale, RandomShift, RandomRotation, RandomSpeed
+from data_augmentation import RandomFlip2D, RandomRotation2D, RandomScale2D, RandomShift2D, RandomSpeed
 from preprocessing import AddRoot, OneItemBatch, Center, FillBlueWithAngle, PadIfLessThan, RemoveZ, ResizeIfMoreThan, SortColumns, TranslationScaleInvariant, OneItemUnbatch
 import tensorflow_datasets as tfds
 from skeleton_graph import tssi_v2
@@ -22,19 +22,19 @@ LayerDict = {
     },
     'random_rotation': {
         'type': LayerType.Augmentation,
-        'layer': RandomRotation(factor=15.0, min_value=0.0, max_value=1.0, num_channels=2, seed=4),
+        'layer': RandomRotation2D(factor=15.0, min_value=0.0, max_value=1.0, seed=4),
     },
     'random_flip': {
         'type': LayerType.Augmentation,
-        'layer': RandomFlip("horizontal", min_value=0.0, max_value=1.0, num_channels=2, seed=3),
+        'layer': RandomFlip2D("horizontal", min_value=0.0, max_value=1.0, seed=3),
     },
     'random_scale': {
         'type': LayerType.Augmentation,
-        'layer': RandomScale(min_value=0.0, max_value=1.0, num_channels=2, seed=1),
+        'layer': RandomScale2D(min_value=0.0, max_value=1.0, seed=1),
     },
     'random_shift': {
         'type': LayerType.Augmentation,
-        'layer': RandomShift(min_value=0.0, max_value=1.0, num_channels=2, seed=2)
+        'layer': RandomShift2D(min_value=0.0, max_value=1.0, seed=2)
     },
     'invariant_frame': {
         'type': LayerType.Normalization,

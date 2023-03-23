@@ -27,16 +27,13 @@ class RandomSpeed(tf.keras.layers.Layer):
         return resized_images
 
 
-class RandomShift(tf.keras.layers.Layer):
-    def __init__(self, min_value=0.0, max_value=255.0, num_channels=3, seed=None, debug=False, **kwargs):
+class RandomShift2D(tf.keras.layers.Layer):
+    def __init__(self, min_value=0.0, max_value=255.0, seed=None, debug=False, **kwargs):
         super().__init__(**kwargs)
         self.min_value = min_value
         self.max_value = max_value
         self.seed = seed
         self.debug = debug
-        self.num_channels = tf.constant(num_channels)
-        if self.num_channels < 2:
-            raise Exception("num_channels = 2 or 3")
 
     @tf.function
     def call(self, image):
@@ -66,17 +63,13 @@ class RandomShift(tf.keras.layers.Layer):
         if self.debug:
             tf.print("green shift", green_shift)
 
-        stacked = tf.cond(
-            tf.equal(self.num_channels, 3),
-            lambda: tf.stack([new_red, new_green, unstacked[-1]], axis=-1),
-            lambda: tf.stack([new_red, new_green], axis=-1)
-        )
+        stacked = tf.stack([new_red, new_green], axis=-1)
 
         return stacked
 
 
-class RandomFlip(tf.keras.layers.Layer):
-    def __init__(self, mode, min_value=0.0, max_value=255.0, around_zero=False, num_channels=3, seed=None, debug=False, **kwargs):
+class RandomFlip2D(tf.keras.layers.Layer):
+    def __init__(self, mode, min_value=0.0, max_value=255.0, around_zero=False, seed=None, debug=False, **kwargs):
         super().__init__(**kwargs)
         self.mode = mode
         self.min_value = min_value
@@ -84,9 +77,6 @@ class RandomFlip(tf.keras.layers.Layer):
         self.seed = seed
         self.debug = debug
         self.around_zero = tf.constant(around_zero)
-        self.num_channels = tf.constant(num_channels)
-        if self.num_channels < 2:
-            raise Exception("num_channels = 2 or 3")
 
     @tf.function
     def add_factor(self, channel):
@@ -128,19 +118,13 @@ class RandomFlip(tf.keras.layers.Layer):
         if self.debug:
             tf.print("flip", rand)
 
-        stacked = tf.cond(
-            tf.equal(self.num_channels, 3),
-            lambda: tf.stack([new_red, new_green, unstacked[-1]], axis=-1),
-            lambda: tf.stack([new_red, new_green], axis=-1)
-        )
-
-        stacked = tf.ensure_shape(stacked, tf.shape(image))
+        stacked = tf.stack([new_red, new_green], axis=-1)
 
         return stacked
 
 
-class RandomRotation(tf.keras.layers.Layer):
-    def __init__(self, factor=15.0, min_value=0.0, max_value=255.0, around_zero=False, clip=True, num_channels=3, seed=None, debug=False, **kwargs):
+class RandomRotation2D(tf.keras.layers.Layer):
+    def __init__(self, factor=15.0, min_value=0.0, max_value=255.0, around_zero=False, clip=True, seed=None, debug=False, **kwargs):
         super().__init__(**kwargs)
         self.min_degree = tf.math.negative(factor)
         self.max_degree = factor
@@ -150,9 +134,6 @@ class RandomRotation(tf.keras.layers.Layer):
         self.debug = debug
         self.around_zero = tf.constant(around_zero)
         self.clip = tf.constant(clip)
-        self.num_channels = tf.constant(num_channels)
-        if self.num_channels < 2:
-            raise Exception("num_channels = 2 or 3")
 
     @tf.function
     def red_origin(self, red):
@@ -209,25 +190,18 @@ class RandomRotation(tf.keras.layers.Layer):
                 new_green, self.min_value, self.max_value),
             lambda: new_green)
 
-        stacked = tf.cond(
-            tf.equal(self.num_channels, 3),
-            lambda: tf.stack([new_red, new_green, unstacked[-1]], axis=-1),
-            lambda: tf.stack([new_red, new_green], axis=-1)
-        )
+        stacked = tf.stack([new_red, new_green], axis=-1)
 
         return stacked
 
 
-class RandomVerticalStretch(tf.keras.layers.Layer):
-    def __init__(self, min_value=0.0, max_value=255.0, num_channels=3, seed=None, debug=False, **kwargs):
+class RandomVerticalStretch2D(tf.keras.layers.Layer):
+    def __init__(self, min_value=0.0, max_value=255.0, seed=None, debug=False, **kwargs):
         super().__init__(**kwargs)
         self.min_value = min_value
         self.max_value = max_value
         self.seed = seed
         self.debug = debug
-        self.num_channels = tf.constant(num_channels)
-        if self.num_channels < 2:
-            raise Exception("num_channels = 2 or 3")
 
     @tf.function
     def round_down_float_to_1_decimal(self, num):
@@ -256,25 +230,18 @@ class RandomVerticalStretch(tf.keras.layers.Layer):
         if self.debug:
             tf.print("alpha", alpha, "max_alpha", max_alpha)
 
-        stacked = tf.cond(
-            tf.equal(self.num_channels, 3),
-            lambda: tf.stack([red, new_green, unstacked[-1]], axis=-1),
-            lambda: tf.stack([red, new_green], axis=-1)
-        )
+        stacked = tf.stack([red, new_green], axis=-1)
 
         return stacked
 
 
-class RandomHorizontalStretch(tf.keras.layers.Layer):
-    def __init__(self, min_value=0.0, max_value=255.0, num_channels=3, seed=None, debug=False, **kwargs):
+class RandomHorizontalStretch2D(tf.keras.layers.Layer):
+    def __init__(self, min_value=0.0, max_value=255.0, seed=None, debug=False, **kwargs):
         super().__init__(**kwargs)
         self.min_value = min_value
         self.max_value = max_value
         self.seed = seed
         self.debug = debug
-        self.num_channels = tf.constant(num_channels)
-        if self.num_channels < 2:
-            raise Exception("num_channels = 2 or 3")
 
     @tf.function
     def round_down_float_to_1_decimal(self, num):
@@ -303,25 +270,18 @@ class RandomHorizontalStretch(tf.keras.layers.Layer):
         if self.debug:
             tf.print("alpha", alpha, "max_alpha", max_alpha)
 
-        stacked = tf.cond(
-            tf.equal(self.num_channels, 3),
-            lambda: tf.stack([new_red, green, unstacked[-1]], axis=-1),
-            lambda: tf.stack([new_red, green], axis=-1)
-        )
+        stacked = tf.stack([new_red, green], axis=-1)
 
         return stacked
 
 
-class RandomScale(tf.keras.layers.Layer):
-    def __init__(self, min_value=0.0, max_value=255.0, num_channels=3, seed=None, debug=False, **kwargs):
+class RandomScale2D(tf.keras.layers.Layer):
+    def __init__(self, min_value=0.0, max_value=255.0, seed=None, debug=False, **kwargs):
         super().__init__(**kwargs)
         self.min_value = min_value
         self.max_value = max_value
         self.seed = seed
         self.debug = debug
-        self.num_channels = tf.constant(num_channels)
-        if self.num_channels < 2:
-            raise Exception("num_channels = 2 or 3")
 
     @tf.function
     def round_down_float_to_1_decimal(self, num):
@@ -379,10 +339,6 @@ class RandomScale(tf.keras.layers.Layer):
         new_red = alpha * (red - red_mid) + red_mid
         new_green = alpha * (green - green_mid) + green_mid
 
-        stacked = tf.cond(
-            tf.equal(self.num_channels, 3),
-            lambda: tf.stack([new_red, new_green, unstacked[-1]], axis=-1),
-            lambda: tf.stack([new_red, new_green], axis=-1)
-        )
+        stacked = tf.stack([new_red, new_green], axis=-1)
 
         return stacked
