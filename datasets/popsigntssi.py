@@ -1,4 +1,4 @@
-"""popsign dataset."""
+"""popsigntssi dataset."""
 
 import sys
 from pathlib import Path
@@ -37,8 +37,8 @@ def get_sign_list():
     return sign_list
 
 
-class PopSign(tfds.core.GeneratorBasedBuilder):
-    """DatasetBuilder for popsign dataset."""
+class PopSignTssi(tfds.core.GeneratorBasedBuilder):
+    """DatasetBuilder for popsignTssi dataset."""
 
     VERSION = tfds.core.Version('1.0.0')
     RELEASE_NOTES = {
@@ -84,8 +84,8 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
             OneItemBatch(),
             RemoveZ(),
             FillNaNValues(),
-            # AddRoot(),
-            # SortColumns(tssi_order=TSSI_ORDER),
+            AddRoot(),
+            SortColumns(tssi_order=TSSI_ORDER),
             OneItemUnbatch()
         ])
 
