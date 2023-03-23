@@ -2,7 +2,7 @@ from enum import IntEnum
 import tensorflow as tf
 from config import MAX_INPUT_HEIGHT, MIN_INPUT_HEIGHT, NUM_CLASSES
 from data_augmentation import RandomFlip, RandomScale, RandomShift, RandomRotation, RandomSpeed
-from preprocessing import AddRoot, Center, FillBlueWithAngle, PadIfLessThan, RemoveZ, ResizeIfMoreThan, SortColumns, TranslationScaleInvariant
+from preprocessing import AddRoot, OneItemBatch, Center, FillBlueWithAngle, PadIfLessThan, RemoveZ, ResizeIfMoreThan, SortColumns, TranslationScaleInvariant, OneItemUnbatch
 import tensorflow_datasets as tfds
 from skeleton_graph import tssi_v2
 
@@ -80,14 +80,6 @@ LayerDict = {
     'remove_z': {
         'type': LayerType.Data,
         'layer': RemoveZ()
-    },
-    'add_root': {
-        'type': LayerType.Data,
-        'layer': AddRoot()
-    },
-    'sort_columns': {
-        'type': LayerType.Data,
-        'layer': SortColumns(tssi_order=tssi_order)
     }
 }
 
@@ -95,23 +87,30 @@ LayerDict = {
 # Augmentation Order = ['speed', 'rotation', 'flip', 'scale', 'shift']
 PipelineDict = {
     'default': {
-        'train': ['random_speed', 'random_flip', 'random_scale', 'add_root', 'sort_columns', 'train_resize', 'pad'],
-        'test': ['add_root', 'sort_columns', 'test_resize', 'pad']
+        'train': ['random_speed', 'random_flip', 'random_scale', 'train_resize', 'pad'],
+        'test': ['test_resize', 'pad']
     }
 }
 
 
 @tf.function
-def label_to_one_hot(item):
-    pose = item["data"]
-    label = item["label"]
-    one_hot_label = tf.one_hot(label, NUM_CLASSES)
-    return pose, one_hot_label
+def extract_pose(item):
+    return item["data"]
 
 
 @tf.function
-def extract_pose(item):
-    return item["data"]
+def base_processing(item):
+    base_preprocessing = tf.keras.Sequential([
+        OneItemBatch(),
+        AddRoot(),
+        SortColumns(tssi_order=tssi_order),
+        OneItemUnbatch()
+    ])
+    pose = item["data"]
+    label = item["label"]
+    pose = base_preprocessing(pose)
+    one_hot_label = tf.one_hot(label, NUM_CLASSES)
+    return pose, one_hot_label
 
 
 def generate_train_dataset(dataset,
@@ -120,8 +119,14 @@ def generate_train_dataset(dataset,
                            batch_size=64,
                            buffer_size=5000,
                            deterministic=False):
-    # convert label(s) to onehot
-    ds = dataset.map(label_to_one_hot).cache()
+    # apply base preprocessing
+    # add root, sort columns and one-hot label encoding
+    # it returns an unbatched dataset
+    ds = dataset.map(
+        base_processing,
+        num_parallel_calls=tf.data.AUTOTUNE,
+        deterministic=False
+    ).cache()
 
     # shuffle, map and batch dataset
     if deterministic:
@@ -147,20 +152,27 @@ def generate_train_dataset(dataset,
 def generate_test_dataset(dataset,
                           test_map_fn,
                           batch_size=64):
-    # convert label(s) to onehot
-    ds = dataset.map(label_to_one_hot)
+    # apply base preprocessing
+    # add root, sort columns and one-hot label encoding
+    # it returns an unbatched dataset
+    ds = dataset.map(
+        base_processing,
+        num_parallel_calls=tf.data.AUTOTUNE,
+        deterministic=False
+    )
 
-    # batch dataset
+    # batch dataset per length
+    def element_length_func(x, y): return tf.shape(x)[0]
     max_element_length = 500
     bucket_boundaries = list(range(1, max_element_length))
     bucket_batch_sizes = [batch_size] * max_element_length
     ds = ds.bucket_by_sequence_length(
-        element_length_func=lambda x, y: tf.shape(x)[0],
+        element_length_func=element_length_func,
         bucket_boundaries=bucket_boundaries,
         bucket_batch_sizes=bucket_batch_sizes,
         no_padding=True)
 
-    # map dataset
+    # map dataset and cache
     dataset = ds \
         .map(test_map_fn,
              num_parallel_calls=tf.data.AUTOTUNE,

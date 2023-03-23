@@ -283,7 +283,7 @@ class FillNaNValues(tf.keras.layers.Layer):
         return keypoints
 
 
-class Batch(tf.keras.layers.Layer):
+class OneItemBatch(tf.keras.layers.Layer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -293,7 +293,7 @@ class Batch(tf.keras.layers.Layer):
         return keypoints
 
 
-class Unbatch(tf.keras.layers.Layer):
+class OneItemUnbatch(tf.keras.layers.Layer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
