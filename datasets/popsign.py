@@ -10,11 +10,11 @@ import numpy as np
 import json
 
 sys.path.insert(0, "../")
-
-from skeleton_graph import tssi_v2
 from preprocessing import OneItemBatch, FillNaNValues, RemoveZ, OneItemUnbatch, AddRoot, SortColumns
+from skeleton_graph import tssi_v2
 
 TSSI_ORDER = tssi_v2[1]
+SOURCE_PATH = Path("./asl-signs")
 
 # Markdown description  that will appear on the catalog page.
 _DESCRIPTION = """
@@ -24,13 +24,13 @@ It contains 250 signs across 94477 videos in total.
 
 
 def get_dataset_list():
-    df = pd.read_csv("train.csv", index_col=0)
+    df = pd.read_csv(SOURCE_PATH / "train.csv", index_col=0)
     df = df.reset_index()
     return df
 
 
 def get_sign_list():
-    f = open("sign_to_prediction_index_map.json")
+    f = open(SOURCE_PATH / "sign_to_prediction_index_map.json")
     sign_dict = json.load(f)
     sorted_sign_items = sorted(sign_dict.items(), key=lambda x: x[1])
     sign_list = [item[0] for item in sorted_sign_items]
@@ -71,12 +71,10 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager: tfds.download.DownloadManager):
         """Returns SplitGenerators."""
 
-        source_path = Path("./asl-signs")
-
         # Returns the Dict[split names, Iterator[Key, Example]]
         return {
-            "train": self._generate_examples(source_path, 'train'),
-            "validation": self._generate_examples(source_path, 'val')
+            "train": self._generate_examples(SOURCE_PATH, 'train'),
+            "validation": self._generate_examples(SOURCE_PATH, 'val')
         }
 
     def _generate_examples(self, source_path, split, cv_split=None):
@@ -86,8 +84,8 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
             OneItemBatch(),
             RemoveZ(),
             FillNaNValues(),
-            AddRoot(),
-            SortColumns(tssi_order=TSSI_ORDER),
+            # AddRoot(),
+            # SortColumns(tssi_order=TSSI_ORDER),
             OneItemUnbatch()
         ])
 
