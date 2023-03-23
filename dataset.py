@@ -1,6 +1,6 @@
 from enum import IntEnum
 import tensorflow as tf
-from config import MAX_INPUT_HEIGHT, MIN_INPUT_HEIGHT, NUM_CLASSES
+from config import MAX_INPUT_HEIGHT, MAX_LENGTH_IN_DATASET, MIN_INPUT_HEIGHT, NUM_CLASSES
 from data_augmentation import RandomFlip, RandomScale, RandomShift, RandomRotation, RandomSpeed
 from preprocessing import AddRoot, OneItemBatch, Center, FillBlueWithAngle, PadIfLessThan, RemoveZ, ResizeIfMoreThan, SortColumns, TranslationScaleInvariant, OneItemUnbatch
 import tensorflow_datasets as tfds
@@ -165,7 +165,7 @@ def generate_test_dataset(dataset,
 
     # batch dataset per length
     def element_length_func(x, y): return tf.shape(x)[0]
-    max_element_length = 500
+    max_element_length = MAX_LENGTH_IN_DATASET
     bucket_boundaries = list(range(1, max_element_length))
     bucket_batch_sizes = [batch_size] * max_element_length
     ds = ds.bucket_by_sequence_length(
