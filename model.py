@@ -9,12 +9,13 @@ from tensorflow.keras import Input
 from tensorflow.keras.models import Model
 # from tensorflow.keras.applications.densenet import DenseNet121
 # from tensorflow.keras.applications.efficientnet import EfficientNetB0
+import wandb
 
 
 def build_densenet121_model(input_shape=[None, 135, 2],
                             dropout=0,
                             optimizer=None,
-                            pretraining=True,
+                            pretraining=False,
                             use_loss="crossentroypy",
                             growth_rate=12,
                             attention=None):
@@ -23,9 +24,17 @@ def build_densenet121_model(input_shape=[None, 135, 2],
             "pretraining on ImageNet is also compatible to growth_rate=32 and attention=None")
 
     # setup backbone
-    weights = 'imagenet' if pretraining else None
+    weights_dir = None
+    if pretraining:
+        api = wandb.Api()
+        # get the directory in which the model is saved
+        weights_at = api.artifact(
+            'davidlainesv/autsl-testing/run_fz31vdq1_model:v0')
+        # download the directory in which the model is saved
+        weights_dir = weights_at.download()
+
     backbone = DenseNet121(input_shape=input_shape,
-                           weights=weights,
+                           weights=None,
                            include_top=False,
                            pooling='avg',
                            growth_rate=growth_rate,
@@ -48,6 +57,10 @@ def build_densenet121_model(input_shape=[None, 135, 2],
 
     # compile the model
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
+    # load weights
+    if pretraining:
+        model.load_weights(weights_dir + "/weights")
 
     return model
 
