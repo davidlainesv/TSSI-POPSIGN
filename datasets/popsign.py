@@ -1,5 +1,6 @@
 """popsign dataset."""
 
+import sys
 from pathlib import Path
 import tensorflow as tf
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
@@ -7,10 +8,13 @@ import tensorflow_datasets as tfds
 import pandas as pd
 import numpy as np
 import json
-import sys
 
 sys.path.insert(0, "../")
-from preprocessing import Batch, FillNaNValues, RemoveZ, Unbatch
+
+from skeleton_graph import tssi_v2
+from preprocessing import OneItemBatch, FillNaNValues, RemoveZ, OneItemUnbatch, AddRoot, SortColumns
+
+TSSI_ORDER = tssi_v2[1]
 
 # Markdown description  that will appear on the catalog page.
 _DESCRIPTION = """
@@ -79,10 +83,12 @@ class PopSign(tfds.core.GeneratorBasedBuilder):
         """Generator of examples for each split."""
 
         preprocessing_pipeline = tf.keras.Sequential([
-            Batch(),
+            OneItemBatch(),
             RemoveZ(),
             FillNaNValues(),
-            Unbatch()
+            AddRoot(),
+            SortColumns(tssi_order=TSSI_ORDER),
+            OneItemUnbatch()
         ])
 
         if cv_split is None:
