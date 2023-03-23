@@ -68,7 +68,7 @@ class RandomShift(tf.keras.layers.Layer):
 
         stacked = tf.cond(
             tf.equal(self.num_channels, 3),
-            lambda: tf.stack([new_red, new_green, unstacked[2]], axis=-1),
+            lambda: tf.stack([new_red, new_green, unstacked[-1]], axis=-1),
             lambda: tf.stack([new_red, new_green], axis=-1)
         )
 
@@ -130,7 +130,7 @@ class RandomFlip(tf.keras.layers.Layer):
 
         stacked = tf.cond(
             tf.equal(self.num_channels, 3),
-            lambda: tf.stack([new_red, new_green, unstacked[2]], axis=-1),
+            lambda: tf.stack([new_red, new_green, unstacked[-1]], axis=-1),
             lambda: tf.stack([new_red, new_green], axis=-1)
         )
 
@@ -209,7 +209,7 @@ class RandomRotation(tf.keras.layers.Layer):
 
         stacked = tf.cond(
             tf.equal(self.num_channels, 3),
-            lambda: tf.stack([new_red, new_green, unstacked[2]], axis=-1),
+            lambda: tf.stack([new_red, new_green, unstacked[-1]], axis=-1),
             lambda: tf.stack([new_red, new_green], axis=-1)
         )
 
@@ -256,8 +256,8 @@ class RandomVerticalStretch(tf.keras.layers.Layer):
 
         stacked = tf.cond(
             tf.equal(self.num_channels, 3),
-            tf.stack([red, new_green, unstacked[2]], axis=-1),
-            tf.stack([red, new_green], axis=-1)
+            lambda: tf.stack([red, new_green, unstacked[-1]], axis=-1),
+            lambda: tf.stack([red, new_green], axis=-1)
         )
 
         return stacked
@@ -303,8 +303,8 @@ class RandomHorizontalStretch(tf.keras.layers.Layer):
 
         stacked = tf.cond(
             tf.equal(self.num_channels, 3),
-            tf.stack([new_red, green, unstacked[2]], axis=-1),
-            tf.stack([new_red, green], axis=-1)
+            lambda: tf.stack([new_red, green, unstacked[-1]], axis=-1),
+            lambda: tf.stack([new_red, green], axis=-1)
         )
 
         return stacked
@@ -379,7 +379,7 @@ class RandomScale(tf.keras.layers.Layer):
 
         stacked = tf.cond(
             tf.equal(self.num_channels, 3),
-            lambda: tf.stack([new_red, new_green, unstacked[2]], axis=-1),
+            lambda: tf.stack([new_red, new_green, unstacked[-1]], axis=-1),
             lambda: tf.stack([new_red, new_green], axis=-1)
         )
 
