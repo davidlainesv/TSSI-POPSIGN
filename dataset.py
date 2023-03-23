@@ -18,7 +18,7 @@ class LayerType(IntEnum):
 LayerDict = {
     'random_speed': {
         'type': LayerType.Augmentation,
-        'layer': RandomSpeed(min_frames=12, max_frames=44, num_channels=2, seed=5),
+        'layer': RandomSpeed(min_frames=12, max_frames=44, seed=5),
     },
     'random_rotation': {
         'type': LayerType.Augmentation,
