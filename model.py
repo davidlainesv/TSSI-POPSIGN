@@ -24,7 +24,7 @@ def get_pretrained_backbone(backbone):
     # setup structure of AUTSL with placeholder layers
     x = backbone(inputs)
     x = Dropout(0)(x)
-    predictions = Dense(256, activation='softmax')(x)
+    predictions = Dense(226, activation='softmax')(x)
     # wrap into a model to load weights
     model = Model(inputs=inputs, outputs=predictions)
     model.load_weights(weights_dir + "/weights")
