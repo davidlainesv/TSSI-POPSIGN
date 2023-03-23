@@ -128,11 +128,7 @@ class RandomFlip(tf.keras.layers.Layer):
         if self.debug:
             tf.print("flip", rand)
 
-        stacked = tf.cond(
-            tf.equal(self.num_channels, 3),
-            lambda: tf.stack([new_red, new_green, unstacked[-1]], axis=-1),
-            lambda: tf.stack([new_red, new_green], axis=-1)
-        )
+        stacked = tf.stack([new_red, new_green], axis=-1)
 
         return stacked
 
