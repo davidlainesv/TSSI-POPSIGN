@@ -2,8 +2,11 @@ from enum import IntEnum
 import tensorflow as tf
 from config import MAX_INPUT_HEIGHT, MIN_INPUT_HEIGHT, NUM_CLASSES
 from data_augmentation import RandomFlip, RandomScale, RandomShift, RandomRotation, RandomSpeed
-from preprocessing import Center, FillBlueWithAngle, FillZWithZeros, PadIfLessThan, RemoveZ, ResizeIfMoreThan, TranslationScaleInvariant
+from preprocessing import AddRoot, Center, FillBlueWithAngle, PadIfLessThan, RemoveZ, ResizeIfMoreThan, SortColumns, TranslationScaleInvariant
 import tensorflow_datasets as tfds
+from skeleton_graph import tssi_v2
+
+tssi_order = tssi_v2()[1]
 
 
 class LayerType(IntEnum):
@@ -15,7 +18,7 @@ class LayerType(IntEnum):
 LayerDict = {
     'random_speed': {
         'type': LayerType.Augmentation,
-        'layer': RandomSpeed(min_frames=40, max_frames=128, seed=5),
+        'layer': RandomSpeed(min_frames=12, max_frames=44, seed=5),
     },
     'random_rotation': {
         'type': LayerType.Augmentation,
@@ -75,8 +78,16 @@ LayerDict = {
                                                variance=[9022.948, 17438.518, 0.])
     },
     'remove_z': {
-        'type': LayerType.Normalization,
+        'type': LayerType.Data,
         'layer': RemoveZ()
+    },
+    'add_root': {
+        'type': LayerType.Data,
+        'layer': AddRoot()
+    },
+    'sort_columns': {
+        'type': LayerType.Data,
+        'layer': SortColumns(tssi_order=tssi_order)
     }
 }
 
@@ -84,35 +95,15 @@ LayerDict = {
 # Augmentation Order = ['speed', 'rotation', 'flip', 'scale', 'shift']
 PipelineDict = {
     'default': {
-        'train': ['random_speed', 'random_flip', 'random_scale', 'remove_z', 'train_resize', 'pad'],
-        'test': ['remove_z', 'test_resize', 'pad']
-    },
-    'default_center': {
-        'train': ['center', 'random_speed', 'train_resize', 'pad'],
-        'test': ['center', 'test_resize', 'pad']
-    },
-    'default_angle': {
-        'train': ['angle', 'random_speed', 'train_resize', 'pad'],
-        'test': ['angle', 'test_resize', 'pad']
-    },
-    'default_norm': {
-        'train': ['random_speed', 'train_resize', 'pad', 'norm'],
-        'test': ['test_resize', 'pad', 'norm']
-    },
-    'invariant_frame': {
-        'train': ['random_speed', 'train_resize', 'invariant_frame', 'pad'],
-        'test': ['test_resize', 'invariant_frame', 'pad']
-    },
-    'invariant_frame_norm': {
-        'train': ['random_speed', 'train_resize', 'invariant_frame', 'pad', 'norm_imagenet'],
-        'test': ['test_resize', 'invariant_frame', 'pad', 'norm_imagenet']
+        'train': ['random_speed', 'random_flip', 'random_scale', 'add_root', 'sort_columns', 'train_resize', 'pad'],
+        'test': ['add_root', 'sort_columns', 'test_resize', 'pad']
     }
 }
 
 
 @tf.function
 def label_to_one_hot(item):
-    pose = item["pose"]
+    pose = item["data"]
     label = item["label"]
     one_hot_label = tf.one_hot(label, NUM_CLASSES)
     return pose, one_hot_label
@@ -120,13 +111,13 @@ def label_to_one_hot(item):
 
 @tf.function
 def extract_pose(item):
-    return item["pose"]
+    return item["data"]
 
 
 def generate_train_dataset(dataset,
                            train_map_fn,
                            repeat=False,
-                           batch_size=32,
+                           batch_size=64,
                            buffer_size=5000,
                            deterministic=False):
     # convert label(s) to onehot
@@ -155,7 +146,7 @@ def generate_train_dataset(dataset,
 
 def generate_test_dataset(dataset,
                           test_map_fn,
-                          batch_size=32):
+                          batch_size=64):
     # convert label(s) to onehot
     ds = dataset.map(label_to_one_hot)
 
@@ -201,7 +192,7 @@ class Dataset():
         global LayerDict
 
         # obtain dataset
-        ds, info = tfds.load('popsign', data_dir="datasets/kaggle/working/datasets", with_info=True)
+        ds, info = tfds.load('pop_sign', data_dir="datasets", with_info=True)
 
         # generate train dataset
         if concat_validation_to_train:
@@ -224,10 +215,10 @@ class Dataset():
         self.num_val_examples = num_val_examples
         self.num_test_examples = num_test_examples
         self.num_total_examples = num_total_examples
-        self.input_width = info.features['pose'].shape[1]
+        self.input_width = info.features["data"].shape[1]
 
     def get_training_set(self,
-                         batch_size=32,
+                         batch_size=64,
                          buffer_size=5000,
                          repeat=False,
                          deterministic=False,
@@ -242,7 +233,6 @@ class Dataset():
         @tf.function
         def train_map_fn(x, y):
             batch = tf.expand_dims(x, axis=0)
-            batch = FillZWithZeros()(batch)
             batch = preprocessing_pipeline(batch, training=True)
             x = tf.ensure_shape(
                 batch[0], [MIN_INPUT_HEIGHT, self.input_width, 2])
@@ -260,7 +250,7 @@ class Dataset():
         return dataset
 
     def get_validation_set(self,
-                           batch_size=32,
+                           batch_size=64,
                            pipeline="default"):
         # define pipeline
         preprocessing_pipeline = build_pipeline(
@@ -281,7 +271,7 @@ class Dataset():
         return dataset
 
     def get_testing_set(self,
-                        batch_size=32,
+                        batch_size=64,
                         pipeline="default"):
         # define pipeline
         preprocessing_pipeline = build_pipeline(
