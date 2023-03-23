@@ -127,7 +127,7 @@ def main(args):
 
     dataset = Dataset(concat_validation_to_train=True)
     steps_per_epoch = np.ceil(dataset.num_train_examples / args.batch_size)
-    save_freq = args.save_freq or num_epochs
+    save_freq = args.save_freq or args.num_epochs
     config = {
         'backbone': args.backbone,
         'pretraining': args.pretraining,
