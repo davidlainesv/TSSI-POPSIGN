@@ -1,7 +1,5 @@
 """popsigntssi dataset."""
 
-from skeleton_graph import tssi_v2
-from preprocessing import OneItemBatch, FillNaNValues, RemoveZ, OneItemUnbatch, AddRoot, SortColumns
 import sys
 from pathlib import Path
 import tensorflow as tf
@@ -12,6 +10,8 @@ import numpy as np
 import json
 
 sys.path.insert(0, "../")
+from skeleton_graph import tssi_v2
+from preprocessing import OneItemBatch, FillNaNValues, RemoveZ, OneItemUnbatch, AddRoot, SortColumns
 
 TSSI_ORDER = tssi_v2()[1]
 SOURCE_PATH = Path("./asl-signs")
