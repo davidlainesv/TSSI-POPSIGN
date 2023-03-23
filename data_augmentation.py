@@ -68,8 +68,8 @@ class RandomShift(tf.keras.layers.Layer):
 
         stacked = tf.cond(
             tf.equal(self.num_channels, 3),
-            tf.stack([new_red, new_green, unstacked[2]], axis=-1),
-            tf.stack([new_red, new_green], axis=-1)
+            lambda: tf.stack([new_red, new_green, unstacked[2]], axis=-1),
+            lambda: tf.stack([new_red, new_green], axis=-1)
         )
 
         return stacked
@@ -130,8 +130,8 @@ class RandomFlip(tf.keras.layers.Layer):
 
         stacked = tf.cond(
             tf.equal(self.num_channels, 3),
-            tf.stack([new_red, new_green, unstacked[2]], axis=-1),
-            tf.stack([new_red, new_green], axis=-1)
+            lambda: tf.stack([new_red, new_green, unstacked[2]], axis=-1),
+            lambda: tf.stack([new_red, new_green], axis=-1)
         )
 
         return stacked
@@ -209,8 +209,8 @@ class RandomRotation(tf.keras.layers.Layer):
 
         stacked = tf.cond(
             tf.equal(self.num_channels, 3),
-            tf.stack([new_red, new_green, unstacked[2]], axis=-1),
-            tf.stack([new_red, new_green], axis=-1)
+            lambda: tf.stack([new_red, new_green, unstacked[2]], axis=-1),
+            lambda: tf.stack([new_red, new_green], axis=-1)
         )
 
         return stacked
@@ -379,8 +379,8 @@ class RandomScale(tf.keras.layers.Layer):
 
         stacked = tf.cond(
             tf.equal(self.num_channels, 3),
-            tf.stack([new_red, new_green, unstacked[2]], axis=-1),
-            tf.stack([new_red, new_green], axis=-1)
+            lambda: tf.stack([new_red, new_green, unstacked[2]], axis=-1),
+            lambda: tf.stack([new_red, new_green], axis=-1)
         )
 
         return stacked
