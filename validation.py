@@ -148,7 +148,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Traning and validation.')
+    parser = argparse.ArgumentParser(description='Training and validation.')
     parser.add_argument('--entity', type=str,
                         help='Entity', default='davidlainesv')
     parser.add_argument('--project', type=str,
