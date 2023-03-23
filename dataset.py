@@ -98,17 +98,19 @@ def extract_pose(item):
     return item["data"]
 
 
+COMMON_PREPROCESSING = tf.keras.Sequential([
+    OneItemBatch(),
+    AddRoot(),
+    SortColumns(tssi_order=tssi_order),
+    OneItemUnbatch()
+])
+
+
 @tf.function
 def base_processing(item):
-    base_preprocessing = tf.keras.Sequential([
-        OneItemBatch(),
-        AddRoot(),
-        SortColumns(tssi_order=tssi_order),
-        OneItemUnbatch()
-    ])
     pose = item["data"]
     label = item["label"]
-    pose = base_preprocessing(pose)
+    pose = COMMON_PREPROCESSING(pose)
     one_hot_label = tf.one_hot(label, NUM_CLASSES)
     return pose, one_hot_label
 
