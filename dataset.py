@@ -99,10 +99,10 @@ def extract_pose(item):
 
 
 COMMON_PREPROCESSING = tf.keras.Sequential([
-    OneItemBatch(),
-    AddRoot(),
-    SortColumns(tssi_order=TSSI_ORDER),
-    OneItemUnbatch()
+    # OneItemBatch(),
+    # AddRoot(),
+    # SortColumns(tssi_order=TSSI_ORDER),
+    # OneItemUnbatch()
 ])
 
 
@@ -206,7 +206,7 @@ class Dataset():
         global LayerDict
 
         # obtain dataset
-        ds, info = tfds.load('pop_sign', data_dir="datasets", with_info=True)
+        ds, info = tfds.load('pop_sign_tssi', data_dir="datasets", with_info=True)
 
         # generate train dataset
         if concat_validation_to_train:
