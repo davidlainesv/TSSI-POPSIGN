@@ -13,7 +13,7 @@ sys.path.insert(0, "../")
 from preprocessing import OneItemBatch, FillNaNValues, RemoveZ, OneItemUnbatch, AddRoot, SortColumns
 from skeleton_graph import tssi_v2
 
-TSSI_ORDER = tssi_v2[1]
+TSSI_ORDER = tssi_v2()[1]
 SOURCE_PATH = Path("./asl-signs")
 
 # Markdown description  that will appear on the catalog page.
