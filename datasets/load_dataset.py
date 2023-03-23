@@ -1,4 +1,4 @@
 import tensorflow_datasets as tfds
-import popsign
+import popsigntssi
 
-ds, info = tfds.load('pop_sign', data_dir=".", with_info=True)
+ds, info = tfds.load('pop_sign_tssi', data_dir=".", with_info=True)
