@@ -148,6 +148,8 @@ def main(args):
         'batch_size': args.batch_size,
         'pipeline': args.pipeline,
         'num_epochs': args.num_epochs,
+
+        'save_freq': int(steps_per_epoch * args.save_freq)
     }
 
     agent_fn(config=config, project=args.project,
@@ -195,6 +197,9 @@ if __name__ == "__main__":
                         help='Pipeline', default="default")
     parser.add_argument('--num_epochs', type=int,
                         help='Number of epochs', default=24)
+
+    parser.add_argument('--save_freq', type=int,
+                        help='Save weights at epoch')
 
     args = parser.parse_args()
 
