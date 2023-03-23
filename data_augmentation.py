@@ -134,7 +134,7 @@ class RandomFlip(tf.keras.layers.Layer):
             lambda: tf.stack([new_red, new_green], axis=-1)
         )
 
-        stacked = tf.ensure_shape(stacked, tf.shape[image])
+        stacked = tf.ensure_shape(stacked, tf.shape(image))
 
         return stacked
 
