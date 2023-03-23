@@ -1,5 +1,7 @@
 """popsigntssi dataset."""
 
+from skeleton_graph import tssi_v2
+from preprocessing import OneItemBatch, FillNaNValues, RemoveZ, OneItemUnbatch, AddRoot, SortColumns
 import sys
 from pathlib import Path
 import tensorflow as tf
@@ -10,8 +12,6 @@ import numpy as np
 import json
 
 sys.path.insert(0, "../")
-from preprocessing import OneItemBatch, FillNaNValues, RemoveZ, OneItemUnbatch, AddRoot, SortColumns
-from skeleton_graph import tssi_v2
 
 TSSI_ORDER = tssi_v2()[1]
 SOURCE_PATH = Path("./asl-signs")
@@ -47,7 +47,7 @@ class PopSignTssi(tfds.core.GeneratorBasedBuilder):
     LANDMARKS_PER_SAMPLE = 543
     DATASET_LIST = get_dataset_list()
     SIGN_LIST = get_sign_list()
-    DATA_SHAPE = (None, LANDMARKS_PER_SAMPLE, 2)
+    DATA_SHAPE = (None, len(TSSI_ORDER), 2)
 
     def _info(self) -> tfds.core.DatasetInfo:
         """Returns the dataset metadata."""
