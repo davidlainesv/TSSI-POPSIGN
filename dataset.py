@@ -18,23 +18,23 @@ class LayerType(IntEnum):
 LayerDict = {
     'random_speed': {
         'type': LayerType.Augmentation,
-        'layer': RandomSpeed(min_frames=12, max_frames=44, seed=5),
+        'layer': RandomSpeed(min_frames=12, max_frames=44, num_channels=2, seed=5),
     },
     'random_rotation': {
         'type': LayerType.Augmentation,
-        'layer': RandomRotation(factor=15.0, min_value=0.0, max_value=1.0, seed=4),
+        'layer': RandomRotation(factor=15.0, min_value=0.0, max_value=1.0, num_channels=2, seed=4),
     },
     'random_flip': {
         'type': LayerType.Augmentation,
-        'layer': RandomFlip("horizontal", min_value=0.0, max_value=1.0, seed=3),
+        'layer': RandomFlip("horizontal", min_value=0.0, max_value=1.0, num_channels=2, seed=3),
     },
     'random_scale': {
         'type': LayerType.Augmentation,
-        'layer': RandomScale(min_value=0.0, max_value=1.0, seed=1),
+        'layer': RandomScale(min_value=0.0, max_value=1.0, num_channels=2, seed=1),
     },
     'random_shift': {
         'type': LayerType.Augmentation,
-        'layer': RandomShift(min_value=0.0, max_value=1.0, seed=2)
+        'layer': RandomShift(min_value=0.0, max_value=1.0, num_channels=2, seed=2)
     },
     'invariant_frame': {
         'type': LayerType.Normalization,
@@ -206,7 +206,8 @@ class Dataset():
         global LayerDict
 
         # obtain dataset
-        ds, info = tfds.load('pop_sign_tssi', data_dir="datasets", with_info=True)
+        ds, info = tfds.load(
+            'pop_sign_tssi', data_dir="datasets", with_info=True)
 
         # generate train dataset
         if concat_validation_to_train:
