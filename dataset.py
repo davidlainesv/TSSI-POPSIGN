@@ -6,7 +6,7 @@ from preprocessing import AddRoot, OneItemBatch, Center, FillBlueWithAngle, PadI
 import tensorflow_datasets as tfds
 from skeleton_graph import tssi_v2
 
-tssi_order = tssi_v2()[1]
+TSSI_ORDER = tssi_v2()[1]
 
 
 class LayerType(IntEnum):
@@ -101,7 +101,7 @@ def extract_pose(item):
 COMMON_PREPROCESSING = tf.keras.Sequential([
     OneItemBatch(),
     AddRoot(),
-    SortColumns(tssi_order=tssi_order),
+    SortColumns(tssi_order=TSSI_ORDER),
     OneItemUnbatch()
 ])
 
@@ -229,7 +229,7 @@ class Dataset():
         self.num_val_examples = num_val_examples
         self.num_test_examples = num_test_examples
         self.num_total_examples = num_total_examples
-        self.input_width = info.features["data"].shape[1]
+        self.input_width = len(TSSI_ORDER)
 
     def get_training_set(self,
                          batch_size=64,
@@ -249,7 +249,7 @@ class Dataset():
             batch = tf.expand_dims(x, axis=0)
             batch = preprocessing_pipeline(batch, training=True)
             x = tf.ensure_shape(
-                batch[0], [MIN_INPUT_HEIGHT, self.input_width, 2])
+                batch[0], [MIN_INPUT_HEIGHT, len(TSSI_ORDER), 2])
             return x, y
 
         train_ds = self.ds["train"]
