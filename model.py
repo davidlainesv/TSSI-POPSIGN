@@ -27,7 +27,7 @@ def get_pretrained_backbone(backbone):
     predictions = Dense(226, activation='softmax')(x)
     # wrap into a model to load weights
     model = Model(inputs=inputs, outputs=predictions)
-    model.load_weights(weights_dir + "/weights")
+    model.load_weights(weights_dir + "/weights").expect_partial()
     # return model up to the last 2 layers
     model = Model(inputs=inputs, outputs=model.layers[-2].output)
     return model
@@ -58,7 +58,7 @@ def build_densenet121_model(input_shape=[None, 135, 2],
 
     # setup model
     inputs = Input(shape=input_shape)
-    x = backbone(inputs)
+    x = backbone(inputs, training=False)
     x = Dropout(dropout)(x)
     predictions = Dense(NUM_CLASSES, activation='softmax')(x)
     model = Model(inputs=inputs, outputs=predictions)
