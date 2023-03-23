@@ -29,7 +29,7 @@ def get_pretrained_backbone(backbone):
     model = Model(inputs=inputs, outputs=predictions)
     model.load_weights(weights_dir + "/weights")
     # return model up to the last 2 layers
-    model = Model(inputs=inputs, outputs=model.layers[-1].output)
+    model = Model(inputs=inputs, outputs=model.layers[-2].output)
     return model
 
 
