@@ -127,6 +127,7 @@ def main(args):
 
     dataset = Dataset(concat_validation_to_train=True)
     steps_per_epoch = np.ceil(dataset.num_train_examples / args.batch_size)
+    save_freq = args.save_freq or num_epochs
     config = {
         'backbone': args.backbone,
         'pretraining': args.pretraining,
@@ -149,7 +150,7 @@ def main(args):
         'pipeline': args.pipeline,
         'num_epochs': args.num_epochs,
 
-        'save_freq': int(steps_per_epoch * args.save_freq)
+        'save_freq': int(steps_per_epoch * save_freq)
     }
 
     agent_fn(config=config, project=args.project,
