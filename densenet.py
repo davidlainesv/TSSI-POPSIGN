@@ -391,7 +391,8 @@ def DenseNet121(
     classes=1000,
     classifier_activation="softmax",
     growth_rate=12,
-    attention=None
+    attention=None,
+    dropout=0
 ):
     """Instantiates the Densenet121 architecture."""
     return DenseNet(
@@ -404,7 +405,8 @@ def DenseNet121(
         classes,
         classifier_activation,
         growth_rate,
-        attention
+        attention,
+        dropout
     )
 
 
@@ -420,7 +422,8 @@ def DenseNet169(
     classes=1000,
     classifier_activation="softmax",
     growth_rate=12,
-    attention=None
+    attention=None,
+    dropout=0
 ):
     """Instantiates the Densenet169 architecture."""
     return DenseNet(
@@ -433,7 +436,8 @@ def DenseNet169(
         classes,
         classifier_activation,
         growth_rate,
-        attention
+        attention,
+        dropout
     )
 
 
@@ -449,7 +453,8 @@ def DenseNet201(
     classes=1000,
     classifier_activation="softmax",
     growth_rate=12,
-    attention=None
+    attention=None,
+    dropout=0
 ):
     """Instantiates the Densenet201 architecture."""
     return DenseNet(
@@ -462,7 +467,8 @@ def DenseNet201(
         classes,
         classifier_activation,
         growth_rate,
-        attention
+        attention,
+        dropout
     )
 
 
