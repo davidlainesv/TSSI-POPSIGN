@@ -9,7 +9,7 @@ def attach_attention_module(net, attention_module):
         net = cbam_block(net)
     else:
         raise Exception(
-            "'{}' is not supported attention module!".format(attention_module))
+            "'{}' is not a supported attention module!".format(attention_module))
 
     return net
 
