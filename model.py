@@ -50,7 +50,8 @@ def build_densenet121_model(input_shape=[None, 135, 2],
                            include_top=False,
                            pooling='avg',
                            growth_rate=growth_rate,
-                           attention=attention)
+                           attention=attention,
+                           dropout=dropout)
 
     # load weights if pretraining
     if pretraining:
@@ -60,7 +61,7 @@ def build_densenet121_model(input_shape=[None, 135, 2],
     inputs = Input(shape=input_shape)
     training_mode = not pretraining
     x = backbone(inputs, training=training_mode)
-    x = Dropout(dropout)(x)
+    # x = Dropout(dropout)(x)
     predictions = Dense(NUM_CLASSES, activation='softmax')(x)
     model = Model(inputs=inputs, outputs=predictions)
 
