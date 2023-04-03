@@ -1,4 +1,4 @@
-"""popsigntssi dataset."""
+"""popsign dataset."""
 
 import sys
 from pathlib import Path
@@ -10,10 +10,10 @@ import numpy as np
 import json
 
 sys.path.insert(0, "../")
-from skeleton_graph import tssi_v2
+from skeleton_graph import no_order
 from preprocessing import OneItemBatch, FillNaNValues, RemoveZ, OneItemUnbatch, AddRoot, SortColumns
 
-TSSI_ORDER = tssi_v2()[1]
+JOINTS_ORDER = no_order()[1]
 SOURCE_PATH = Path("./asl-signs")
 
 # Markdown description  that will appear on the catalog page.
@@ -37,8 +37,8 @@ def get_sign_list():
     return sign_list
 
 
-class PopSignTssi(tfds.core.GeneratorBasedBuilder):
-    """DatasetBuilder for popsignTssi dataset."""
+class PopSign(tfds.core.GeneratorBasedBuilder):
+    """DatasetBuilder for popsign dataset."""
 
     VERSION = tfds.core.Version('1.0.0')
     RELEASE_NOTES = {
@@ -47,7 +47,7 @@ class PopSignTssi(tfds.core.GeneratorBasedBuilder):
     LANDMARKS_PER_SAMPLE = 543
     DATASET_LIST = get_dataset_list()
     SIGN_LIST = get_sign_list()
-    DATA_SHAPE = (None, len(TSSI_ORDER), 2)
+    DATA_SHAPE = (None, len(JOINTS_ORDER), 2)
 
     def _info(self) -> tfds.core.DatasetInfo:
         """Returns the dataset metadata."""
@@ -85,7 +85,7 @@ class PopSignTssi(tfds.core.GeneratorBasedBuilder):
             RemoveZ(),
             FillNaNValues(),
             # AddRoot(),
-            # SortColumns(tssi_order=TSSI_ORDER),
+            # SortColumns(JOINTS_ORDER=JOINTS_ORDER),
             OneItemUnbatch()
         ])
 
