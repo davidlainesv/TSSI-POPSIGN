@@ -134,3 +134,8 @@ wandb/
 # notes
 commands.txt
 commands.sh
+
+# dataset files
+datasets/asl-signs/
+datasets/pop_sign_tssi.zip
+datasets/pop_sign_tssi/
