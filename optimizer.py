@@ -8,7 +8,8 @@ from tensorflow.keras.optimizers import Adam
 def build_sgd_optimizer(initial_learning_rate=0.001,
                         maximal_learning_rate=0.01,
                         step_size=50, momentum=0.0,
-                        nesterov=False, weight_decay=1e-7):
+                        nesterov=False, weight_decay=1e-7,
+                        return_lr_schedule=False):
     # setup schedule
     learning_rate_schedule = TriangularCyclicalLearningRate(
         initial_learning_rate=initial_learning_rate,
@@ -31,7 +32,11 @@ def build_sgd_optimizer(initial_learning_rate=0.001,
     else:
         optimizer = SGD(learning_rate=learning_rate_schedule,
                         momentum=momentum, nesterov=nesterov)
-    return optimizer
+        
+    if return_lr_schedule:
+        return optimizer, learning_rate_schedule
+    else:
+        return optimizer
 
 def build_adam_optimizer(initial_learning_rate=0.001,
                          maximal_learning_rate=0.01,
